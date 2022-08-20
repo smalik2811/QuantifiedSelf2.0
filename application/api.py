@@ -88,10 +88,7 @@ class UserAPI(Resource):
             return "Unexpected error.", 500
 
     def get(self):
-        headers = request.headers
-        bearer = headers.get('Authorization')    # Bearer YourTokenHere
-        token = bearer.split()[1] 
-        return 200
+        pass
 
     def delete(self):
         pass
