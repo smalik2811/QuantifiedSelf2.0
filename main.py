@@ -4,6 +4,8 @@ from flask_restful import Resource, Api
 from application import config
 from application.config import LocalDevelopmentConfig
 from application.database import db
+from flask_security import Security, SQLAlchemySessionUserDatastore, auth_required, hash_password
+from application.models import User, Role
 
 app = None
 api = None
@@ -18,7 +20,9 @@ def create_app():
       app.config.from_object(LocalDevelopmentConfig)
     db.init_app(app)
     api = Api(app)
-    app.app_context().push()  
+    app.app_context().push()
+    user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+    security = Security(app, user_datastore)
     return app, api
 
 app, api = create_app()
@@ -27,9 +31,8 @@ app, api = create_app()
 from application.controllers import *
 
 # Add all restful controllers
-from application.api import UserAPI, UserLoggingAPI
+from application.api import UserAPI
 api.add_resource(UserAPI, "/user")
-api.add_resource(UserLoggingAPI, "/user/login")
 
 if __name__ == '__main__':
   # Run the Flask app
