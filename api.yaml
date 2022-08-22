@@ -138,7 +138,11 @@ paths:
       summary: Updates the user profile.
       description: This can only be done by the logged in user.
       operationId: updateUser
-      parameters: []
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       requestBody:
         description: Details to update.
         content:
@@ -166,15 +170,18 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected error.
-      security:
-        - Token: []
+      
     delete:
       tags:
         - user
       summary: Delete user
       description: This can only be done by the logged in user.
       operationId: deleteUser
-      parameters: []
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       responses:
         '401':
           description: Unauthorised Access
@@ -182,8 +189,7 @@ paths:
           description: Deletion Successful
         '500':
           description: Unexpected error.
-      security:
-        - Token: []   
+         
   /user/login:
     post:
       tags:
@@ -235,7 +241,11 @@ paths:
       summary: Logs out current logged in user session
       description: ''
       operationId: logoutUser
-      parameters: []
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       responses:
         '200':
           description: Logout Successful
@@ -243,8 +253,7 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected error.
-      security:
-        - Token: []   
+         
   /tracker:
     post:
       tags:
@@ -252,6 +261,11 @@ paths:
       summary: Create new Tracker
       description: Logged in user can create a new Tracker.
       operationId: createTracker
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       requestBody:
         description: Details of the Tracker to be created.
         content:
@@ -295,14 +309,18 @@ paths:
           description: Username already exist.
         '500':
           description: Unexpected error.  
-      security:
-        - Token: []
+      
     get:
       tags:
         - tracker
       summary: Get all the Trackers.
       description: Logged in user can get the details of all the trackers user created.
       operationId: readAllTrackers
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       responses:
         '200':
           description: Request Successful
@@ -326,8 +344,7 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected error.  
-      security:
-        - Token: []
+      
   /tracker/{name}:
     get:
       tags:
@@ -342,6 +359,10 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string    
       responses:
         '200':
           description: Operation Successful.
@@ -372,8 +393,7 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected Error.  
-      security:
-        - Token: []
+      
     patch:
       tags:
         - tracker
@@ -387,6 +407,10 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string      
       requestBody:
         description: Details of the Tracker
         content:
@@ -416,8 +440,7 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected Error.  
-      security:
-        - Token: []
+      
     delete:
       tags:
         - tracker
@@ -431,6 +454,10 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string 
       responses:
         '404':
           description: Tracker not found.
@@ -440,8 +467,7 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected Error.  
-      security:
-        - Token: []
+     
   /log:
     post:
       tags:
@@ -449,6 +475,11 @@ paths:
       summary: Create new Log
       description: Logged in user can log a Tracker.
       operationId: createLog
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       requestBody:
         description: Details of the Log
         content:
@@ -489,8 +520,7 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected error.
-      security:
-        - Token: []
+
     get:
       tags:
         - log
@@ -504,6 +534,10 @@ paths:
             type: integer
             format: int32
           required: true
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string   
       responses:
         '200':
           description: Request Successful
@@ -533,8 +567,7 @@ paths:
           description: Log not found.
         '500':
           description: Unexpected error.
-      security:
-        - Token: []
+      
     patch:
       tags:
         - log
@@ -548,6 +581,10 @@ paths:
             type: integer
             format: int32
           required: true
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string    
       requestBody:
         description: Details of the Log
         content:
@@ -599,8 +636,7 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected Error.
-      security:
-        - Token: []
+          
   /log/{name}:  
     get:
       tags:
@@ -615,6 +651,10 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string 
       responses:
         '200':
           description: Request Successful
@@ -651,11 +691,5 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected Error.
-      security:
-        - Token: []
+      
         
-components:
-  securitySchemes:
-    Token:
-      type: http
-      scheme: bearer
