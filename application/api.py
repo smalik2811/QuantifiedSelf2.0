@@ -1,7 +1,7 @@
 from hmac import digest_size
 from math import exp
 from flask_restful import Resource, Api
-from flask_restful import fields, marshal_with
+from flask_restful import fields, marshal_with, marshal
 from flask_restful import reqparse
 from application.validation import BusinessValidationError, NotFoundError, DuplicateResource
 from application.models import User
@@ -32,8 +32,9 @@ personal_details = {
     'email':    fields.String
 }
 
-token_response = {
-    'token': fields.String
+test_api_resource_fields = {
+    'msg':    fields.String,
+    'username': fields.String,
 }
 
 
@@ -88,12 +89,10 @@ class UserAPI(Resource):
         except:
             return "Unexpected error.", 500
 
-    # @marshal_with(personal_details)
     @auth_required("token")
+    @marshal_with(personal_details)
     def get(self):
-        print("hello world")
-        a = current_user
-        return current_user.username
+        return current_user
 
     def delete(self):
         pass
