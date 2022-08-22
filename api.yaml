@@ -99,6 +99,11 @@ paths:
       summary: Get User Details
       description: 'The logged in user can get the personal details.'
       operationId: viewUser
+      parameters:
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
       responses:
         '200':
           description: Operation Successful
@@ -127,8 +132,6 @@ paths:
           description: Unauthorised Access
         '500':
           description: Unexpected error.
-      security:
-        - Token: []
     patch:
       tags:
         - user
@@ -193,6 +196,7 @@ paths:
           in: query
           schema:
             type: string
+            default: "True"
       requestBody:
         description: Credentials to login.
         content:
