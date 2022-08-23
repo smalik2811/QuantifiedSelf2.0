@@ -1,6 +1,7 @@
 from hmac import digest_size
 from math import exp
-from flask_restful import Resource, Api
+from urllib import request
+from flask_restful import Resource, Api, request
 from flask_restful import fields, marshal_with, marshal
 from flask_restful import reqparse
 from application.validation import BusinessValidationError, NotFoundError, DuplicateResource
@@ -12,48 +13,30 @@ from flask import abort
 from flask_security import auth_required
 from flask_login import current_user
 
-# Parser used when creating new User
-create_user_details = reqparse.RequestParser()
-create_user_details.add_argument('username')
-create_user_details.add_argument('password')
-create_user_details.add_argument('firstName')
-create_user_details.add_argument('lastName')
-create_user_details.add_argument('email')
+# Parser for User
+user_details = reqparse.RequestParser()
+user_details.add_argument('email')
+user_details.add_argument('password')
+user_details.add_argument('firstName')
+user_details.add_argument('lastName')
 
-# Parser used for user Logging
-log_user_parser = reqparse.RequestParser()
-log_user_parser.add_argument('userName')
-log_user_parser.add_argument('password')
 
 personal_details = {
-    'username':    fields.String,
     'first_name' : fields.String,
     'last_name' : fields.String,
     'email':    fields.String
 }
 
-test_api_resource_fields = {
-    'msg':    fields.String,
-    'username': fields.String,
-}
 
 
 class UserAPI(Resource):
 
-    def put(self):
-        pass
-
     def post(self):
-        args = create_user_details.parse_args()
-        userName = args.get("username", None)
+        args = user_details.parse_args()        
+        email = args.get("email", None)
         password = args.get("password", None)
         firstName = args.get("firstName", None)
         lastName = args.get("lastName", None)
-        email = args.get("email", None)
-
-        if userName is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1001", error_message="userName is required")
 
         if password is None:
             raise BusinessValidationError(
@@ -73,16 +56,14 @@ class UserAPI(Resource):
             raise BusinessValidationError(
                 status_code=400, error_code="BE1006", error_message="Invalid email")
 
-        user = db.session.query(User).filter(
-            (User.username == userName) | (User.email == email)).first()
+        user = db.session.query(User).filter(User.email == email).first()
 
         if user:
             raise BusinessValidationError(
-                status_code=409, error_code="BE1007", error_message="userName already exist.")
+                status_code=409, error_code="BE1007", error_message="email already exist.")
 
         try:
-            new_user = User(username=userName, fs_uniquifier=userName, password=password,
-                            first_name=firstName, last_name=lastName, email=email, active=1, role=1)
+            new_user = User(email=email, password=password, first_name=firstName, last_name=lastName, fs_uniquifier=email, active=1, role=1)
             db.session.add(new_user)
             db.session.commit()
             return "User created successfully.", 201
@@ -92,8 +73,46 @@ class UserAPI(Resource):
     @auth_required("token")
     @marshal_with(personal_details)
     def get(self):
-        return current_user
+        try:
+            return current_user, 200
+        except:
+            return "Unexpected error", 500
+    
+    @auth_required("token")
+    def patch(self):
+        try:
+            args = user_details.parse_args()        
+            email = args.get("email", None)
+            password = args.get("password", None)
+            firstName = args.get("firstName", None)
+            lastName = args.get("lastName", None)
 
+            logged_user = db.session.query(User).filter(User.email == current_user.email).first()
+
+            if email:
+                logged_user.email = email
+            
+            if password:
+                logged_user.password = password
+            
+            if firstName:
+                logged_user.first_name = firstName
+
+            if lastName:
+                logged_user.last_name = lastName
+            
+            db.session.commit()
+
+            return "Update Successful", 200
+        except:
+            return "Unexpected error", 500
+        
+    @auth_required("token")
     def delete(self):
-        pass
+        try:
+            logged_user = db.session.query(User).filter(User.email == current_user.email).first()
+            db.session.delete(logged_user)
+            db.session.commit()
+        except:
+            return "Unexpected error", 500
 

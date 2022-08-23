@@ -57,9 +57,6 @@ paths:
             schema:
               type: object
               properties:
-                userName:
-                  type: string
-                  example: "Charles54"
                 password:
                   type: string
                   format: password
@@ -150,9 +147,11 @@ paths:
               schema:
                 type: object
                 properties:
+                  email:
+                    type: string
+                    example: prof_x_54@outlook.com
                   password:
                     type: string
-                    format: password
                     example: Long_Password_Is_Better_Than_A_Complex_One
                   firstName:
                     type: string
@@ -160,9 +159,7 @@ paths:
                   lastName:
                     type: string
                     example: Xavier
-                  email:
-                    type: string
-                    example: prof_x_54@outlook.com
+     
       responses:
         '200':
           description: Update Successful
