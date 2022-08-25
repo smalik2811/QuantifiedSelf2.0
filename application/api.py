@@ -2,6 +2,7 @@ from dataclasses import field
 from hmac import digest_size
 from math import exp
 from sqlite3 import Timestamp
+from typing_extensions import Required
 from urllib import request
 from flask_restful import Resource, Api, request
 from flask_restful import fields, marshal_with, marshal
@@ -18,9 +19,9 @@ from flask import jsonify
 
 # Parser for User
 user_details_parser = reqparse.RequestParser()
-user_details_parser.add_argument('email')
-user_details_parser.add_argument('password')
-user_details_parser.add_argument('firstName')
+user_details_parser.add_argument('email', required = True)
+user_details_parser.add_argument('password', required = True)
+user_details_parser.add_argument('firstName', required = True)
 user_details_parser.add_argument('lastName')
 
 user_details = {
@@ -39,38 +40,26 @@ log_details = {
 
 # Parser for Tracker
 tracker_details_parser = reqparse.RequestParser()
-tracker_details_parser.add_argument('name')
+tracker_details_parser.add_argument('name', Required = True)
 tracker_details_parser.add_argument('description')
-tracker_details_parser.add_argument('type', type=int)
+tracker_details_parser.add_argument('type', type=int, Required = True)
 tracker_details_parser.add_argument('options', action='append')
 
 # Parser for Log
 log_details_parser = reqparse.RequestParser()
-log_details_parser.add_argument('value')
+log_details_parser.add_argument('value', Required = True)
 log_details_parser.add_argument('note')
-log_details_parser.add_argument('timestamp')
-log_details_parser.add_argument('Tracker-Id', location='headers')
+log_details_parser.add_argument('timestamp', Required = True)
+log_details_parser.add_argument('Tracker-Id', location='headers', Required = True)
 
 class UserAPI(Resource):
 
     def post(self):
         args = user_details_parser.parse_args()        
-        email = args.get("email", None)
-        password = args.get("password", None)
-        firstName = args.get("firstName", None)
-        lastName = args.get("lastName", None)
-
-        if password is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1002", error_message="password is required")
-
-        if firstName is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1003", error_message="firstName is required")
-
-        if email is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1005", error_message="email is required")
+        email = args.get("email")
+        password = args.get("password")
+        firstName = args.get("firstName")
+        lastName = args.get("lastName")
 
         if "@" in email:
             pass
@@ -104,22 +93,16 @@ class UserAPI(Resource):
     def patch(self):
         try:
             args = user_details_parser.parse_args()        
-            email = args.get("email", None)
-            password = args.get("password", None)
-            firstName = args.get("firstName", None)
+            email = args.get("email")
+            password = args.get("password")
+            firstName = args.get("firstName")
             lastName = args.get("lastName")
 
             logged_user = db.session.query(User).filter(User.email == current_user.email).first()
 
-            if email:
-                logged_user.email = email
-            
-            if password:
-                logged_user.password = password
-            
-            if firstName:
-                logged_user.first_name = firstName
-            
+            logged_user.email = email
+            logged_user.password = password
+            logged_user.first_name = firstName
             logged_user.last_name = lastName
             
             db.session.commit()
@@ -143,16 +126,10 @@ class Tracker1API(Resource):
     def post(self):
         try:
             args = tracker_details_parser.parse_args()
-            name = args.get('name', None)
-            description = args.get('description', None)
-            type = args.get('type', None)
-            options = args.get('options', None)
-
-            if name is None:
-                raise BusinessValidationError(400, "BE008", "Tracker name is required")
-            
-            if type is None:
-                raise BusinessValidationError(400, "BE009", "Tracker type is required.")
+            name = args.get('name')
+            description = args.get('description')
+            type = args.get('type')
+            options = args.get('options')
             
             if db.session.query(Tracker).filter(Tracker.name == name).first():
                 raise BusinessValidationError(409, "BE010", "Tracker already exist.")
