@@ -32,7 +32,7 @@ info:
     
   contact:
     email: smalik2811@outlook.com
-  version: "1.0"
+  version: "2.0"
 servers:
   - url: http://localhost:8080/
 tags:
@@ -159,7 +159,6 @@ paths:
                   lastName:
                     type: string
                     example: Xavier
-     
       responses:
         '200':
           description: Update Successful
@@ -279,7 +278,7 @@ paths:
                 type:
                   type: integer
                   format: int64
-                  example: 2
+                  example: 4
                 options:
                   type: array
                   items:
@@ -303,7 +302,7 @@ paths:
         '401':
           description: Unauthorised Access
         '409':
-          description: Username already exist.
+          description: Tracker already exist.
         '500':
           description: Unexpected error.  
       
@@ -421,11 +420,6 @@ paths:
                 description:
                   type: string
                   example: Game I play in Evening.
-                options:
-                  type: array
-                  items:
-                      type: string
-                  example: ["Cricket","Badminton","Football"]
       responses:
         '201':
           description: Update Successful.
@@ -688,5 +682,3 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected Error.
-      
-        

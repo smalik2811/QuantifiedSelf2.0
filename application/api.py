@@ -1,3 +1,4 @@
+from dataclasses import field
 from hmac import digest_size
 from math import exp
 from urllib import request
@@ -12,17 +13,16 @@ import werkzeug
 from flask import abort
 from flask_security import auth_required
 from flask_login import current_user
-import json
+from flask import jsonify
 
 # Parser for User
-user_details = reqparse.RequestParser()
-user_details.add_argument('email')
-user_details.add_argument('password')
-user_details.add_argument('firstName')
-user_details.add_argument('lastName')
+user_details_parser = reqparse.RequestParser()
+user_details_parser.add_argument('email')
+user_details_parser.add_argument('password')
+user_details_parser.add_argument('firstName')
+user_details_parser.add_argument('lastName')
 
-
-personal_details = {
+user_details = {
     'first_name' : fields.String,
     'last_name' : fields.String,
     'email':    fields.String
@@ -31,17 +31,17 @@ personal_details = {
 
 
 # Parser for Tracker
-tracker_details = reqparse.RequestParser()
-tracker_details.add_argument('name')
-tracker_details.add_argument('description')
-tracker_details.add_argument('type', type=int)
-tracker_details.add_argument('options', action='append')
+tracker_details_parser = reqparse.RequestParser()
+tracker_details_parser.add_argument('name')
+tracker_details_parser.add_argument('description')
+tracker_details_parser.add_argument('type', type=int)
+tracker_details_parser.add_argument('options', action='append')
 
 
 class UserAPI(Resource):
 
     def post(self):
-        args = user_details.parse_args()        
+        args = user_details_parser.parse_args()        
         email = args.get("email", None)
         password = args.get("password", None)
         firstName = args.get("firstName", None)
@@ -80,7 +80,7 @@ class UserAPI(Resource):
             return "Unexpected error.", 500
 
     @auth_required("token")
-    @marshal_with(personal_details)
+    @marshal_with(user_details)
     def get(self):
         try:
             return current_user, 200
@@ -90,11 +90,11 @@ class UserAPI(Resource):
     @auth_required("token")
     def patch(self):
         try:
-            args = user_details.parse_args()        
+            args = user_details_parser.parse_args()        
             email = args.get("email", None)
             password = args.get("password", None)
             firstName = args.get("firstName", None)
-            lastName = args.get("lastName", None)
+            lastName = args.get("lastName")
 
             logged_user = db.session.query(User).filter(User.email == current_user.email).first()
 
@@ -106,9 +106,8 @@ class UserAPI(Resource):
             
             if firstName:
                 logged_user.first_name = firstName
-
-            if lastName:
-                logged_user.last_name = lastName
+            
+            logged_user.last_name = lastName
             
             db.session.commit()
 
@@ -130,7 +129,7 @@ class Tracker1API(Resource):
     @auth_required('token')
     def post(self):
         try:
-            args = tracker_details.parse_args()
+            args = tracker_details_parser.parse_args()
             name = args.get('name', None)
             description = args.get('description', None)
             type = args.get('type', None)
@@ -174,12 +173,58 @@ class Tracker1API(Resource):
     @auth_required('token')
     def get(self):
         trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
-        return json.dumps(trackers), 200
-
+        tracker_list = []
+        for tracker in trackers:
+            tracker_list.append({'name' : tracker.name, 'description' : tracker.description})
+        return tracker_list, 200
 
 class Tracker2API(Resource):
     
     @auth_required('token')
     def get(self, name):
+
         tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
-        return json.dumps(tracker), 200
+        options_list = []
+        options = db.session.query(Options).filter(Options.tracker_id == tracker.id).all()
+        for option in options:
+            options_list.append(option.name)
+        tracker_dict = {
+            'name' : tracker.name,
+            'description' : tracker.description,
+            'type' : tracker.type,
+            'options' : options_list
+        }
+
+        return tracker_dict, 200
+
+    @auth_required("token")
+    def patch(self, name):
+        try:
+            args = tracker_details_parser.parse_args()        
+            new_name = args.get("name", None)
+            new_description = args.get("description")
+            new_options = args.get("options", None)
+
+            tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
+
+            if new_name:
+                tracker.name = new_name
+            
+            tracker.description = new_description
+                        
+            db.session.commit()
+
+            return "Update Successful", 200
+        except:
+            return "Unexpected error", 500   
+
+
+    @auth_required("token")
+    def delete(self, name):
+        try:
+            tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
+            db.session.delete(tracker)
+            db.session.commit()
+            return "Deletion Successful", 200
+        except:
+            return "Unexpected error", 500         
