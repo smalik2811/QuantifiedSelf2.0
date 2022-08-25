@@ -31,8 +31,10 @@ app, api = create_app()
 from application.controllers import *
 
 # Add all restful controllers
-from application.api import UserAPI
+from application.api import *
 api.add_resource(UserAPI, "/user")
+api.add_resource(Tracker2API,"/tracker/<string:name>")
+api.add_resource(Tracker1API, "/tracker")
 
 if __name__ == '__main__':
   # Run the Flask app

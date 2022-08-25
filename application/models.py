@@ -29,14 +29,14 @@ class Tracker(db.Model):
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     type = db.Column(db.Integer, db.ForeignKey("tracker_type.id") ,nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
 
 class Log(db.Model):
     __tablename__ = 'log'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    tracker_id = db.Column(db.Integer, db.ForeignKey("Tracker.id"),  nullable=False)
+    tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id"),  nullable=False)
     value = db.Column(db.String, nullable=False)
     note = db.Column(db.String, nullable=True)
     timestamp = db.Column(db.String, nullable=False)
@@ -45,7 +45,7 @@ class Log(db.Model):
 class Options(db.Model):
     __tablename__ = 'options'
 
-    tracker_id = db.Column(db.Integer, db.ForeignKey("Tracker.id"), primary_key=True)
+    tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id"), primary_key=True)
     name = db.Column(db.String, primary_key=True)
 
 
