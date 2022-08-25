@@ -464,6 +464,11 @@ paths:
       description: Logged in user can log a Tracker.
       operationId: createLog
       parameters:
+        - name: Tracker-Id
+          in: header
+          schema:
+            type: string
+          required: true
         - in: header
           name: Authentication-Token
           schema:
@@ -475,9 +480,6 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                  example: Evening Game
                 value:
                   type: string
                   example: Cricket
@@ -512,15 +514,14 @@ paths:
     get:
       tags:
         - log
-      summary: Get single tracker
+      summary: Get all logs of a tracker
       description: Logged in user can get details of log with the id.
       operationId: readLog
       parameters:
-        - name: Tracker Name
+        - name: Tracker-Id
           in: header
           schema:
-            type: integer
-            format: int32
+            type: string
           required: true
         - in: header
           name: Authentication-Token
