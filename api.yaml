@@ -109,9 +109,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  userName:
-                    type: string
-                    example: Charles54
                   password:
                     type: string
                     format: password
@@ -141,24 +138,24 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Details to update.
+        description: Details of the Tracker
         content:
-            applicatin/json:
-              schema:
-                type: object
-                properties:
-                  email:
-                    type: string
-                    example: prof_x_54@outlook.com
-                  password:
-                    type: string
-                    example: Long_Password_Is_Better_Than_A_Complex_One
-                  firstName:
-                    type: string
-                    example: Charles
-                  lastName:
-                    type: string
-                    example: Xavier
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: prof_x_54@outlook.com
+                password:
+                  type: string
+                  example: Long_Password_Is_Better_Than_A_Complex_One
+                firstName:
+                  type: string
+                  example: Charles
+                lastName:
+                  type: string
+                  example: Xavier
       responses:
         '200':
           description: Update Successful
@@ -519,7 +516,7 @@ paths:
       description: Logged in user can get details of log with the id.
       operationId: readLog
       parameters:
-        - name: logID
+        - name: Tracker Name
           in: header
           schema:
             type: integer
@@ -558,85 +555,16 @@ paths:
           description: Log not found.
         '500':
           description: Unexpected error.
-      
-    patch:
-      tags:
-        - log
-      summary: Update Log
-      description: Logged in user can update the log with the logid.
-      operationId: updateLog
-      parameters:
-        - name: logID
-          in: header
-          schema:
-            type: integer
-            format: int32
-          required: true
-        - in: header
-          name: Authentication-Token
-          schema:
-            type: string    
-      requestBody:
-        description: Details of the Log
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                value:
-                  type: string
-                  example: "Cricket"
-                note:
-                  type: string
-                  example: I think I am kinda enjoying Cricket.
-                timestamp:
-                  type: string
-                  example: Wed Aug 10 2022 11:30:38
-      responses:
-        '201':
-          description: Update Successful.
-        '400':
-          description: Invalid id supplied.
-        '401':
-          description: Unauthorised Access
-        '404':
-          description: Log not found.
-        '500':
-          description: Unexpected Error.
-      security:
-        - Token: []
-    delete:
-      tags:
-        - log
-      summary: Delete Log
-      description: Logged in user can delete the log with the logid.
-      operationId: deleteLog
-      parameters:
-        - name: logID
-          in: header
-          schema:
-            type: integer
-            format: int32
-          required: true
-      responses:
-        '404':
-          description: Tracker not found.
-        '200':
-          description: Deletion Successful.
-        '401':
-          description: Unauthorised Access
-        '500':
-          description: Unexpected Error.
-          
-  /log/{name}:  
+                
+  /log/{id}:  
     get:
       tags:
         - log
-      summary: Get all the Logs.
+      summary: Get Log by id.
       description: Logged in user can get the details of all the log for a particular tracker.
       operationId: readAllLogs
       parameters:
-        - name: name
+        - name: id
           in: path
           description: Name of the tracker to get all the logs.
           required: true
@@ -682,3 +610,76 @@ paths:
           description: Tracker not found.
         '500':
           description: Unexpected Error.
+    patch:
+      tags:
+        - log
+      summary: Update Log
+      description: Logged in user can update the log with the logid.
+      operationId: updateLog
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+            format: int32
+          required: true
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string    
+      requestBody:
+        description: Details of the Log
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  example: "Cricket"
+                note:
+                  type: string
+                  example: I think I am kinda enjoying Cricket.
+                timestamp:
+                  type: string
+                  example: Wed Aug 10 2022 11:30:38
+      responses:
+        '201':
+          description: Update Successful.
+        '400':
+          description: Invalid id supplied.
+        '401':
+          description: Unauthorised Access
+        '404':
+          description: Log not found.
+        '500':
+          description: Unexpected Error.   
+    delete:
+      tags:
+        - log
+      summary: Delete Log
+      description: Logged in user can delete the log with the logid.
+      operationId: deleteLog
+      parameters:
+        - name: id
+          in: path
+          description: Name of the tracker to get all the logs.
+          required: true
+          schema:
+            type: string
+        - name: logID
+          in: header
+          schema:
+            type: integer
+            format: int32
+          required: true
+      responses:
+        '404':
+          description: Tracker not found.
+        '200':
+          description: Deletion Successful.
+        '401':
+          description: Unauthorised Access
+        '500':
+          description: Unexpected Error.   
+    

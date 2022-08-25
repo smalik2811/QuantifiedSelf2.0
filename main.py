@@ -35,6 +35,8 @@ from application.api import *
 api.add_resource(UserAPI, "/user")
 api.add_resource(Tracker2API,"/tracker/<string:name>")
 api.add_resource(Tracker1API, "/tracker")
+api.add_resource(Log1API, "/log")
+api.add_resource(Log2APPI, "/log/<int:id>")
 
 if __name__ == '__main__':
   # Run the Flask app

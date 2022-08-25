@@ -1,6 +1,7 @@
 from dataclasses import field
 from hmac import digest_size
 from math import exp
+from sqlite3 import Timestamp
 from urllib import request
 from flask_restful import Resource, Api, request
 from flask_restful import fields, marshal_with, marshal
@@ -28,6 +29,12 @@ user_details = {
     'email':    fields.String
 }
 
+log_details = {
+    'id': fields.Integer,
+    'value' : fields.String,
+    'note' : fields.String,
+    'timestamp': fields.String
+}
 
 
 # Parser for Tracker
@@ -37,6 +44,12 @@ tracker_details_parser.add_argument('description')
 tracker_details_parser.add_argument('type', type=int)
 tracker_details_parser.add_argument('options', action='append')
 
+# Parser for Log
+log_details_parser = reqparse.RequestParser()
+log_details_parser.add_argument('value')
+log_details_parser.add_argument('note')
+log_details_parser.add_argument('timestamp')
+log_details_parser.add_argument('Tracker-Id', location='headers')
 
 class UserAPI(Resource):
 
@@ -175,7 +188,7 @@ class Tracker1API(Resource):
         trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
         tracker_list = []
         for tracker in trackers:
-            tracker_list.append({'name' : tracker.name, 'description' : tracker.description})
+            tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description})
         return tracker_list, 200
 
 class Tracker2API(Resource):
@@ -189,6 +202,7 @@ class Tracker2API(Resource):
         for option in options:
             options_list.append(option.name)
         tracker_dict = {
+            'id' : tracker.id,
             'name' : tracker.name,
             'description' : tracker.description,
             'type' : tracker.type,
@@ -227,4 +241,83 @@ class Tracker2API(Resource):
             db.session.commit()
             return "Deletion Successful", 200
         except:
-            return "Unexpected error", 500         
+            return "Unexpected error", 500      
+
+class Log1API(Resource):
+
+    @auth_required('token')
+    def post(self):
+        args = log_details_parser.parse_args()
+        tracker_id = args.get('Tracker-Id', None)    
+        value = args.get("value", None)
+        note = args.get("note")
+        timestamp = args.get("timestamp", None)
+        
+
+        if value is None:
+            raise BusinessValidationError(
+                status_code=400, error_code="BE1002", error_message="password is required")
+
+        if timestamp is None:
+            raise BusinessValidationError(
+                status_code=400, error_code="BE1005", error_message="email is required")
+
+        try:
+            new_log = Log(trakcer_id = tracker_id, value = value, note = note, timestamp = timestamp)
+            db.session.add(new_log)
+            db.session.commit()
+            return "Log created successfully.", 201
+        except:
+            return "Unexpected error.", 500
+
+    @auth_required('token')
+    def get(self):
+        args = log_details_parser.parse_args()
+        tracker_id = args.get('Tracker-Id', None)  
+        logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
+        log_list = []
+        for log in logs:
+            log_list.append({'id': log.id, 'value' : log.value, 'note' : log.note, 'timestamp': log.timestamp})
+        return log_list, 200
+
+class Log2APPI(Resource):
+
+    @auth_required('token')
+    @marshal_with(log_details)
+    def get(self, id):
+        log = db.session.query(Log).filter(Log.id == id).first()
+        return log, 200
+
+    @auth_required('token')
+    def patch(self, id):
+        try:
+            args = log_details_parser.parse_args()        
+            value = args.get("value", None)
+            note = args.get("note")
+            timestamp = args.get("timestamp", None)
+
+            log = db.session.query(Log).filter(Log.id == id).first()
+
+            if value:
+                log.value = value
+            
+            log.note = note
+
+            if timestamp:
+                log.timestamp = timestamp
+                        
+            db.session.commit()
+
+            return "Update Successful", 200
+        except:
+            return "Unexpected error", 500
+
+    @auth_required('token')
+    def delete(self, id):
+        try:
+            log = db.session.query(Log).filter(Log.id == id).first()
+            db.session.delete(log)
+            db.session.commit()
+            return "Deletion Successful", 200
+        except:
+            return "Unexpected error", 500       
