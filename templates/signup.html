@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Quatified Self</title>
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+
+<body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
+    <div class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
+        <div class="row">
+            <div class="col">
+                <div style="padding: 12px;">
+                    <h1 class="text-secondary">Sign up</h1>
+                </div>
+            </div>
+            <div class="col">
+                <div style="text-align: right;padding: 12px;"><button class="btn btn-danger" type="button" style="border-radius: 4px;">Sign in</button></div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 2vh;">
+            <div class="col-md-12">
+                <div>
+                    <div style="margin-bottom: 15vh;">
+                        <div>
+                            <h4>Enter details</h4>
+                        </div>
+                        <div>
+                            <form action="/signup" method="POST" id="signup-form">
+                                <div style="margin: 10px;"><label class="form-label">Name</label><input required name = "name" class="form-control" type="text" required="" minlength="4"></div>
+                                <div style="margin: 11px;"><label class="form-label">Username</label><input  required name = "user" class="form-control" type="text" required="" minlength="6"></div>
+                                <div style="margin: 11px;"><label class="form-label">Password</label><input required name = "pass" class="form-control" type="password" required="" minlength="8"></div>
+                                <div style="margin: 11px;"><label class="form-label">Confirm Password</label><input required name = "con_pass" class="form-control" type="password" required="" minlength="8"></div>
+                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><button class="btn btn-success" type="Submit">Sign up</button></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../static/js/bs-init.js"></script>
+</body>
+<script type="text/javascript">
+    var ans = '{{msg}}'
+    if (ans !== "") {
+        window.alert(ans)
+    }
+</script>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Quatified Self</title>
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="../static//css/styles.css">
+</head>
+
+<body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
+    <div class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
+        <div class="row">
+            <div class="col">
+                <div style="padding: 12px;">
+                    <h1 class="text-secondary">Hello, {{user['name']}}</h1>
+                </div>
+            </div>
+            <div class="col">
+                <div style="text-align: right;padding: 12px;"><a href = "/" class = "btn btn-danger" type = "button" style = "border-radius: 4px;">Logout</a></div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 2vh;">
+            <div class="col-md-12">
+                <div>
+                    <div style="margin-bottom: 15vh;">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tracker</th>
+                                        <th>Last tracked</th>
+                                        <th>Log</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tracker in trackers %}
+                                    <tr>
+	                                    <td>
+                                            <a href="/{{user['username']}}/tracker/{{tracker['id']}}">{{tracker['name']}}</a>
+                                        </td>
+                                        <td>{{tracker['last']}}</td>
+                                        <td>
+                                            <div>
+                                                <a href = "/{{user['username']}}/{{tracker['id']}}/log" class = "btn btn-success" type = "button">+</a>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item link-info" href="/{{user['username']}}/tracker/edit/{{tracker['id']}}">Edit</a>
+                                                        <a class="dropdown-item link-danger" href="/{{user['username']}}/tracker/delete/{{tracker['id']}}">Remove</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="text-center" style="text-align: right;padding: 53px;margin-bottom: 0px;"><a href = "/{{user['username']}}/tracker" class = "btn btn-success" type = "button" >Add</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../static/js/bs-init.js"></script>
+</body>
+
+</html>
