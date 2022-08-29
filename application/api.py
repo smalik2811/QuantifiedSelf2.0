@@ -2,7 +2,6 @@ from dataclasses import field
 from hmac import digest_size
 from math import exp
 from sqlite3 import Timestamp
-from typing_extensions import Required
 from urllib import request
 from flask_restful import Resource, Api, request
 from flask_restful import fields, marshal_with, marshal
@@ -40,17 +39,17 @@ log_details = {
 
 # Parser for Tracker
 tracker_details_parser = reqparse.RequestParser()
-tracker_details_parser.add_argument('name', Required = True)
+tracker_details_parser.add_argument('name', required = True)
 tracker_details_parser.add_argument('description')
-tracker_details_parser.add_argument('type', type=int, Required = True)
+tracker_details_parser.add_argument('type', type=int, required = True)
 tracker_details_parser.add_argument('options', action='append')
 
 # Parser for Log
 log_details_parser = reqparse.RequestParser()
-log_details_parser.add_argument('value', Required = True)
+log_details_parser.add_argument('value', required = True)
 log_details_parser.add_argument('note')
-log_details_parser.add_argument('timestamp', Required = True)
-log_details_parser.add_argument('Tracker-Id', location='headers', Required = True)
+log_details_parser.add_argument('timestamp', required = True)
+log_details_parser.add_argument('Tracker-Id', location='headers', required = True)
 
 class UserAPI(Resource):
 
