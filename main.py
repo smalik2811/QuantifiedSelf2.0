@@ -28,7 +28,7 @@ def create_app():
 app, api = create_app()
 
 # Import all the controllers so they are loaded
-from application.controllers import home
+from application.controllers import *
 
 # Add all restful controllers
 from application.api import *

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>Login</title>
+        <link rel="icon" type="image/x-icon" href="../static/img/computer.webp">
+        <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="../static/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+        <link rel="stylesheet" href="../static/css/styles.css">
+
+    </head>
+
+    <body class="d-md-flex justify-content-md-center align-items-md-center" style="letter-spacing: 1px;background: linear-gradient(-89deg, rgb(154,56,200) 1%, rgb(35,96,241) 98%);">
+        <div id="app" class="container" style="padding: 20px;background: #ffffff;border-radius: 15px;margin-top: 15vh;">
+            <div class="row">
+                <div class="col-md-6" style="background: url(&quot;../static/img/computer.webp&quot;) center / contain no-repeat;">
+                    <div></div>
+                </div>
+                <div class="col-md-6" style="padding: 50px;">
+                    <div style="width: 300px;padding: 7px;">
+                        <form action="">
+                            <div>
+                                <p style="font-size: 25px;font-weight: bold;">Member Login</p>
+                            </div>
+                            <div style="background: #f1f1f1;border-radius: 25px;padding: 10px;">
+                                <i class="fa fa-envelope" style="margin-left: 15px;color: rgb(152,152,152);font-size: 14px;"></i>
+                                <input name="email" v-model="formData.email" type="text" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Email">
+                            </div>
+                            <div style="background: #f1f1f1;border-radius: 25px;padding: 10px;margin-top: 15px;">
+                                <i class="fa fa-lock" style="margin-left: 15px;color: rgb(152,152,152);font-size: 20px;"></i>
+                                <input name="pass" v-model="formData.password" type="text" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Password">
+                            </div>
+                            <div style="background: #95e47a;border-radius: 25px;margin-top: 15px;">
+                                <button @click.prevent="loginUser" class="btn text-center" data-bss-hover-animate="pulse" type="submit" style="color: rgb(255,255,255);width: 286px;height: 58px;border-radius: 25px;">Login</button>
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <p class="text-center" style="margin-top: 10px;color: rgb(152,152,152);">
+                                    &nbsp; &nbsp; <a href="/signup">Create account</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../static/bootstrap/js/bootstrap.min.js"></script>
+        <script src="../static/js/bs-init.js"></script>
+        <script src="../static/vue/vue.min.js"></script>
+        <script src="../static/js/login.js"></script>
+    </body>
+</html>
