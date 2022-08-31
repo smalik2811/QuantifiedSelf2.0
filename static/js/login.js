@@ -12,22 +12,26 @@ new Vue({
 
     methods: {
         async loginUser(){
-            const res = await fetch('/user/login?include_auth_token',{
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(this.formData),
-            });
-
-            if (res.ok){
-                const data = await res.json()
-                localStorage.setItem(
-                    'Authentication-Token',
-                    data.response.user.authentication_token
-                )
-                window.location.href = '/home';
+                fetch('/user/login?include_auth_token', {
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.formData),
+                })
+                .then((resopnse) => resopnse.json())
+                .then((data) => 
+                    {
+                        localStorage.setItem(
+                            'Authentication-Token',
+                            data.response.user.authentication_token
+                        )
+                        window.location.href = '/';
+                    })
+                    .catch((err) =>{
+                        this.c.err = true;
+                        this.c.errmsg = "Network error " + err;
+                    })
             }
-        }
     },
 });
