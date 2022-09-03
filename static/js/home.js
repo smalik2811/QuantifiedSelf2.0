@@ -8,19 +8,33 @@ Vue.component('tracker', {
 
     template:
         `
-        <div class="card" style="width: 18rem;">
-            <div class="card-header ">Last Modified: {{last_modified}} </div>
-            <img class="card-img-top w-100 d-block" src="https://picsum.photos/400/300" />
-            <div class="card-body">
-                <h4 class="card-title">{{name}}</h4>
-                <p class="card-text">{{description}}</p>
-            </div>
-            <div class="card-footer ">
-                <button class="btn btn-primary" type="button">Log</button>
-                <button class="btn btn-warning" type="button">Update</button>
-                <button class="btn btn-danger" type="button">Delete</button>
-            </div>
-        </div>
+        <tr>
+            <td>
+                <a href="#">{{name}}</a>
+            </td>
+            <td>
+                {{description}}
+            </td>
+            <td>
+                {{last_modified}}
+            </td>
+            <td>
+                <div>
+                    <a href = "#" class = "btn btn-success" type = "button">+</a>
+                </div>
+            </td>
+            <td>
+                <div>
+                    <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item link-info" href="#">Edit</a>
+                            <a class="dropdown-item link-danger" href="#">Remove</a>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
     `,
 
     created(){

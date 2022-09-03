@@ -13,12 +13,6 @@
         <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
         <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-        <style>
-            .my-card {
-                height: 350px;
-                width: 350px;
-            }
-        </style>
     </head>
 
     <body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
@@ -31,19 +25,37 @@
                 </div>
                 <div class="col">
                     <div style="text-align: right;padding: 12px;">
+                        <a href="#" class="btn btn-success" type="button">Add</a>
                         <button @click="userLogout" class="btn btn-danger" type="button">Logout</button></div>
                 </div>
             </div>
             <div class="row" style="margin-top: 2vh;">
                 <div class="col-md-12">
                     <div>
-                        <div style="margin-bottom: 10vh;">
-                            <div v-for="tracker in trackers" :key="tracker.id">
-                                <tracker :name="tracker.name" :description="tracker.description"></tracker>
+                        <div style="margin-bottom: 15vh;">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tracker</th>
+                                            <th> Description</th>
+                                            <th>Last tracked</th>
+                                            <th>Log</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            v-for="tracker in trackers"
+                                            is="tracker"
+                                            :name="tracker.name"
+                                            :description="tracker.description"
+                                            :key="tracker.id"
+                                        ></tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="text-center" style="text-align: right;padding: 53px;margin-bottom: 0px;"><a
-                                href="/user['username']/tracker" class="btn btn-success" type="button">Add</a>
                     </div>
                 </div>
             </div>
