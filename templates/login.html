@@ -27,11 +27,11 @@
                             </div>
                             <div style="background: #f1f1f1;border-radius: 25px;padding: 10px;">
                                 <i class="fa fa-envelope" style="margin-left: 15px;color: rgb(152,152,152);font-size: 14px;"></i>
-                                <input name="email" v-model="formData.email" type="text" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Email">
+                                <input name="email" v-model="formData.email" type="email" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Email">
                             </div>
                             <div style="background: #f1f1f1;border-radius: 25px;padding: 10px;margin-top: 15px;">
                                 <i class="fa fa-lock" style="margin-left: 15px;color: rgb(152,152,152);font-size: 20px;"></i>
-                                <input name="pass" v-model="formData.password" type="text" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Password">
+                                <input name="pass" v-model="formData.password" type="password" data-bss-hover-animate="pulse" style="background: rgba(255,255,255,0);border-style: none;margin-left: 10px;color: rgb(152,152,152);width: 220px;" placeholder="Password">
                             </div>
                             <div style="background: #95e47a;border-radius: 25px;margin-top: 15px;">
                                 <button @click.prevent="loginUser" class="btn text-center" data-bss-hover-animate="pulse" type="submit" style="color: rgb(255,255,255);width: 286px;height: 58px;border-radius: 25px;">Login</button>

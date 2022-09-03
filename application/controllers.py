@@ -9,3 +9,11 @@ def login():
 @app.route("/login")
 def home():
     return render_template("login.html")
+
+@app.route("/signup")
+def signup():
+    return render_template("signup.html")
+
+@app.route("/tracker")
+def createTracker():
+    return render_template("createTracker.html")

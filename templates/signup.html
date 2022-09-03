@@ -12,7 +12,7 @@
 </head>
 
 <body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
-    <div class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
+    <div id="app" class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
         <div class="row">
             <div class="col">
                 <div style="padding: 12px;">
@@ -31,12 +31,13 @@
                             <h4>Enter details</h4>
                         </div>
                         <div>
-                            <form action="/signup" method="POST" id="signup-form">
-                                <div style="margin: 10px;"><label class="form-label">Name</label><input required name = "name" class="form-control" type="text" required="" minlength="4"></div>
-                                <div style="margin: 11px;"><label class="form-label">Username</label><input  required name = "user" class="form-control" type="text" required="" minlength="6"></div>
-                                <div style="margin: 11px;"><label class="form-label">Password</label><input required name = "pass" class="form-control" type="password" required="" minlength="8"></div>
-                                <div style="margin: 11px;"><label class="form-label">Confirm Password</label><input required name = "con_pass" class="form-control" type="password" required="" minlength="8"></div>
-                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><button class="btn btn-success" type="Submit">Sign up</button></div>
+                            <form action="">
+                                <div style="margin: 10px;"><label class="form-label">Firstname</label><input v-model="userData.firstName" required class="form-control" type="text" minlength="4"></div>
+                                <div style="margin: 10px;"><label class="form-label">Lirstname</label><input v-model="userData.lastName" class="form-control" type="text"></div>
+                                <div style="margin: 11px;"><label class="form-label">Email</label><input required v-model="userData.email" class="form-control" type="email" required></div>
+                                <div style="margin: 11px;"><label class="form-label">Password</label><input required v-model="userData.password"  class="form-control" type="password" minlength="8"></div>
+                                <div style="margin: 11px;"><label class="form-label">Confirm Password</label><input required v-model="confirm_password" class="form-control" type="password"></div>
+                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><button @click.prevent="signup" class="btn btn-success" type="Submit">Sign up</button></div>
                             </form>
                         </div>
                     </div>
@@ -46,11 +47,7 @@
     </div>
     <script src="../static/bootstrap/js/bootstrap.min.js"></script>
     <script src="../static/js/bs-init.js"></script>
+    <script src="../static/vue/vue.js"></script>
+    <script src="../static/js/signup.js"></script>
 </body>
-<script type="text/javascript">
-    var ans = '{{msg}}'
-    if (ans !== "") {
-        window.alert(ans)
-    }
-</script>
 </html>
