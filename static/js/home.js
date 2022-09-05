@@ -54,7 +54,7 @@ let vue = new Vue({
 
     methods: {
         userLogout(){
-            fetch('/user/logout', {
+            fetch('/api/user/logout', {
                 method: 'get',
                 headers: {
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -63,13 +63,14 @@ let vue = new Vue({
             .then((response) => 
             {
                 localStorage.clear()
+                document.cookie = 'my_cookie=; path=/; domain=http://192.168.139.50:8080/; expires=' + new Date(0).toUTCString();
                 window.location.href = '/login';
             }) 
         },
     },
 
     created() {
-        fetch('/tracker',{
+        fetch('/api/tracker',{
             method: 'get',
             headers: {
                 'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -78,7 +79,7 @@ let vue = new Vue({
         .then((resopnse) => resopnse.json())
         .then((trackers) => this.trackers = trackers);
 
-        fetch('/user', {
+        fetch('/api/user', {
             method: 'get',
             headers: {
                 'Authentication-Token': localStorage.getItem('Authentication-Token'),

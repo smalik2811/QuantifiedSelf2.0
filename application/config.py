@@ -19,6 +19,6 @@ class LocalDevelopmentConfig(Config):
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
     SECURITY_UNAUTHORIZED_VIEW = False
-    SECURITY_LOGIN_URL = "/user/login"
-    SECURITY_LOGOUT_URL = "/user/logout"
+    SECURITY_LOGIN_URL = "/api/user/login"
+    SECURITY_LOGOUT_URL = "/api/user/logout"
     SECURITY_BACKWARDS_COMPAT_UNAUTHN = True

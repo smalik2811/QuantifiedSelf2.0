@@ -12,7 +12,7 @@ new Vue({
 
     methods: {
         async loginUser(){
-                fetch('/user/login?include_auth_token', {
+                fetch('/api/user/login?include_auth_token', {
                     method: 'post',
                     headers: {
                         'Content-Type': 'application/json',

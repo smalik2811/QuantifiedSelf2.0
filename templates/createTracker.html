@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Quatified Self</title>
+    <title>Create Tracker</title>
     <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/fonts/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
@@ -12,15 +12,17 @@
 </head>
 
 <body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
-    <div class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
+    <div id="app" class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
         <div class="row">
             <div class="col">
                 <div style="padding: 12px;">
-                    <h1 class="text-secondary">Hello, </h1>
+                    <h1 class="text-secondary">Hello, ${userData.name}</h1>
                 </div>
             </div>
             <div class="col">
-                <div style="text-align: right;padding: 12px;"><a href = "/" class = "btn btn-danger" type = "button" style = "border-radius: 4px;">Logout</a></div>
+                <div style="text-align: right;padding: 12px;">
+                    <button @click="userLogout" class="btn btn-danger" type="button">Logout</button>
+                </div>
             </div>
         </div>
         <div class="row" style="margin-top: 2vh;">
@@ -31,21 +33,39 @@
                             <h4>Add Tracker</h4>
                         </div>
                         <div>
-                            <form action="//tracker" method="POST" id="add_tracker-form">
-                                <div><label class="form-label">Name</label><input required name = "name" class="form-control" type="text"></div>
-                                <div><label class="form-label">Description</label><textarea required name = "desc" class="form-control"></textarea></div>
+                            <form action="/">
+                                <div>
+                                    <label class="form-label">Tracker Name</label>
+                                    <input v-model="trackerData.name" required class="form-control" type="text">
+                                </div>
+                                <div>
+                                    <label class="form-label">Description</label>
+                                    <textarea v-model="trackerData.description" required class="form-control"></textarea>
+                                </div>
                                 <div><label class="form-label">Tracker Type</label>
                                     <div class="row">
-                                        <div class="col"><input required name = "tr_type" id = "tr_type" class="form-control" type="text" readonly  /></div>
                                         <div class="col">
-                                            <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Type </button>
-                                                <div class="dropdown-menu"><a class="dropdown-item" onclick="getElementById('tr_type').value = 'Numerical'; getElementById('settings').value = '';">Numerical</a><a class="dropdown-item" onclick="getElementById('tr_type').value = 'Multiple Choice'; getElementById('settings').value = 'Value 1, Value2, Value 3';";>Multiple Choice</a><a class="dropdown-item" onclick="getElementById('tr_type').value = 'Time Duration'; getElementById('settings').value = '';">Time Duraiton</a><a class="dropdown-item" onclick="getElementById('tr_type').value = 'Boolean'; getElementById('settings').value = '';">Boolean</a></div>
+                                            <input :value="misc.tr_type" required class="form-control" type="text" readonly  /></div>
+                                        <div class="col">
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Type </button>
+                                                <div class="dropdown-menu">
+                                                    <a @click="selectType('Numerical')" class="dropdown-item">Numerical</a>
+                                                    <a @click="selectType('Time Duration')" class="dropdown-item">Time Duraiton</a>
+                                                    <a @click="selectType('Boolean')" class="dropdown-item">Boolean</a>
+                                                    <a @click="selectType('Multiple Choice')" class="dropdown-item">Multiple Choice</a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div><label class="form-label">Settings</label><input id = "settings" name = "settings" class="form-control" type="text"></div>
-                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><input type = "submit" value = "Add it" class = "btn btn-success"></div>
+                                <div v-if="multiChoice">
+                                    <label class="form-label">Options</label>
+                                    <input v-model="misc.options" class="form-control" type="text">
+                                </div>
+                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;">
+                                    <button @click.prevent="createTracker" class="btn btn-success" type="Submit">Add it</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -55,11 +75,7 @@
     </div>
     <script src="../static/bootstrap/js/bootstrap.min.js"></script>
     <script src="../static/js/bs-init.js"></script>
-</body>
-<script type="text/javascript">
-    var ans = ''
-    if (ans !== "") {
-        window.alert(ans)
-    }
-</script>    
+    <script src="../static/vue/vue.js"></script>
+    <script src="../static/js/createTracker.js"></script>
+</body>   
 </html>

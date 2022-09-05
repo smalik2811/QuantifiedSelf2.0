@@ -15,7 +15,7 @@ new Vue({
 
     methods: {
         async signup(){
-                fetch('/user', {
+                fetch('/api/user', {
                     method: 'post',
                     headers: {
                         'Content-Type': 'application/json',
