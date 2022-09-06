@@ -53,39 +53,69 @@ let vue = new Vue({
     },
 
     methods: {
-        userLogout(){
-            fetch('/api/user/logout', {
-                method: 'get',
-                headers: {
-                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
-                },
-            })
-            .then((response) => 
-            {
+        async userLogout(){
+            let response = await fetch('/api/user/logout', {
+                                    method: 'get',
+                                    headers: {
+                                        'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                                    },
+                                })
+            if (response.status === 200) {
                 localStorage.clear()
-                document.cookie = 'my_cookie=; path=/; domain=http://192.168.139.50:8080/; expires=' + new Date(0).toUTCString();
                 window.location.href = '/login';
-            }) 
+            }else if (response.status === 401){
+                window.alert('You are now authorised.')
+                window.location.href = '/login';
+            }else if (response.status === 500){
+                window.alert('Something went wrong.')
+            }else{
+                window.alert(response.statusText)
+            } 
         },
     },
-
+    
     created() {
+        // Redirect to login page if not authorised
+        if (localStorage.getItem('Authentication-Token') == null){
+            window.alert("You are not authorised.\nRedirecting to Login page.")
+            window.location.href = '/login'
+            return
+        }
+
+        // Fetching trackers to show in the dashboard.
         fetch('/api/tracker',{
             method: 'get',
             headers: {
                 'Authentication-Token': localStorage.getItem('Authentication-Token'),
             },
         })
-        .then((resopnse) => resopnse.json())
+        .then((response) => {
+            if(response.status == 200){
+                return response.json()
+            }else if(response.status == 401){}
+            else{
+                window.alert("Something went wrong.")
+                userLogout()
+            }
+        })
         .then((trackers) => this.trackers = trackers);
 
+        // Fetching user details
         fetch('/api/user', {
             method: 'get',
             headers: {
                 'Authentication-Token': localStorage.getItem('Authentication-Token'),
             },
         })
-        .then((response) => response.json())
+        .then((response) => {
+            if(response.status == 200){
+                return response.json()
+            }else if(response.status == 401){}
+            else{
+                window.alert("Something went wrong.")
+                userLogout()
+            }
+        })
         .then((user) => {
             this.name = user.first_name,
             this.name = this.name + " " + user.last_name

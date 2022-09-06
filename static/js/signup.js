@@ -22,7 +22,19 @@ new Vue({
                     },
                     body: JSON.stringify(this.userData),
                 })
-                .then((resopnse) => resopnse.json())
+                .then((response) => {
+                    if(response.status == 200){
+                        return response.json()
+                    }else if(response.status == 400){
+                        window.alert(response.statusText)
+                    }else if(response.status == 409){
+                        window.alert(response.statusText)
+                    }
+                    else{
+                        window.alert("Something went wrong.")
+                        userLogout()
+                    }
+                })
                 .then((data) => 
                     {
                         window.location.href = '/login';
@@ -33,4 +45,13 @@ new Vue({
                     })
             }
     },
+
+    created() {
+        // Redirect to login page if not authorised
+        if (localStorage.getItem('Authentication-Token') == null){
+            window.alert("You are not authorised.\nRedirecting to Login page.")
+            window.location.href = '/login'
+            return
+        }
+    }
 });

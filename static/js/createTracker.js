@@ -42,19 +42,24 @@ new Vue({
             }
         },
 
-        userLogout(){
-            fetch('/api/user/logout', {
-                method: 'get',
-                headers: {
-                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
-                },
-            })
-            .then((response) => 
-            {
+        async userLogout(){
+            let response = await fetch('/api/user/logout', {
+                                    method: 'get',
+                                    headers: {
+                                        'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                                    },
+                                })
+            if (response.status === 200) {
                 localStorage.clear()
-                document.cookie = 'my_cookie=; path=/; domain=http://192.168.139.50:8080/; expires=' + new Date(0).toUTCString();
                 window.location.href = '/login';
-            }) 
+            }else if (response.status === 401){
+                window.alert('You are now authorised.')
+                window.location.href = '/login';
+            }else if (response.status === 500){
+                window.alert('Something went wrong.')
+            }else{
+                window.alert(response.statusText)
+            } 
         },
 
         async createTracker(){
@@ -71,7 +76,19 @@ new Vue({
                 },
                 body: JSON.stringify(this.trackerData),
             })
-            .then((resopnse) => resopnse.json())
+            .then((response) => {
+                if(response.status == 200){
+                    return response.json()
+                }else if(response.status == 400){
+                    window.alert(response.statusText)
+                }else if(response.status == 401){}
+                else if(response.status == 409){
+                    window.alert(response.statusText)
+                }else{
+                    window.alert(response.statusText)
+                }
+                
+            })
             .then((data) => 
                 {
                     window.location.href = '/';
@@ -90,16 +107,25 @@ new Vue({
     },
 
     created() {
+        // Fetching user details
         fetch('/api/user', {
             method: 'get',
             headers: {
                 'Authentication-Token': localStorage.getItem('Authentication-Token'),
             },
         })
-        .then((response) => response.json())
-        .then((user) => {
-            this.userData.name = user.first_name,
-            this.userData.name = this.userData.name + " " + user.last_name
+        .then((response) => {
+            if(response.status == 200){
+                return response.json()
+            }else if(response.status == 401){}
+            else{
+                window.alert("Something went wrong.")
+                userLogout()
+            }
         })
-    },
+        .then((user) => {
+            this.name = user.first_name,
+            this.name = this.name + " " + user.last_name
+        })
+      },
 });
