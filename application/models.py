@@ -30,6 +30,7 @@ class Tracker(db.Model):
     description = db.Column(db.String)
     type = db.Column(db.Integer, db.ForeignKey("tracker_type.id") ,nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    last_modified = db.Column(db.String, nullable=False)
 
 
 class Log(db.Model):
@@ -47,6 +48,7 @@ class Options(db.Model):
 
     tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id"), primary_key=True)
     name = db.Column(db.String, primary_key=True)
+    active = db.Column(db.Integer, nullable=False, default=1)
 
 
 class TrackerType(db.Model):

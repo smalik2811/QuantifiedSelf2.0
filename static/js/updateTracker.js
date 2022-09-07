@@ -19,8 +19,16 @@ new Vue({
                 "Boolean": 3,
                 "Multiple Choice": 4,
             },
+            
+            trackerTypes2: {
+                1: "Numerical",
+                2: "Time Duration",
+                3: "Boolean",
+                4: "Multiple Choice"
+            },
 
             misc: {
+                tr_name: null,
                 tr_type: null,
                 options: null
             }
@@ -38,7 +46,14 @@ new Vue({
                     this.misc.options = "Option1, Option2, Option3"
                 }else{
                     this.misc.options = null
+                    this.trackerData.options = null
                 }
+            }
+        },
+
+        selectType2: function(type){
+            if (type in this.trackerTypes2){
+                this.misc.tr_type = this.trackerTypes2[type]
             }
         },
 
@@ -62,14 +77,14 @@ new Vue({
             } 
         },
 
-        async createTracker(){
+        async updateTracker(){
 
             if (this.misc.options != null){
                 this.trackerData.options = this.misc.options.split(", ")
             }
 
-            fetch('/api/tracker', {
-                method: 'post',
+            fetch('/api/tracker/' + this.misc.tr_name, {
+                method: 'patch',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -123,5 +138,41 @@ new Vue({
             this.userData.name = user.first_name,
             this.userData.name = this.userData.name + " " + user.last_name
         })
-      },
+
+        // Fetching tracker data
+        {
+            let uri = window.location.pathname.split("/")
+            this.misc.tr_name = uri[uri.length - 1]
+
+            fetch('/api/tracker/' + this.misc.tr_name, {
+                method: 'get',
+                headers: {
+                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                },
+            })
+            .then((response) => {
+                if(response.status == 200){
+                    return response.json()
+                }else if(response.status == 400){
+                    window.alert(response.statusText)
+                }else if(response.status == 401){}
+                else if(response.status == 404){
+                    window.alert(response.statusText)
+                }else{
+                    window.alert(response.statusText)
+                }  
+            })
+            .then((data) => 
+                {
+                    this.trackerData = data
+                    this.selectType2(this.trackerData.type)
+                    this.misc.options = ""
+                    for (let i = 0; i < this.trackerData.options.length - 1; i ++){
+                        this.misc.options += this.trackerData.options[i] + ", "
+                    }
+                    this.misc.options += this.trackerData.options[this.trackerData.options.length-1]
+                }
+            )
+        }
+    },
 });

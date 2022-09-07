@@ -1,5 +1,6 @@
 from dataclasses import field
 from hmac import digest_size
+from lib2to3.pgen2.token import OP
 from math import exp
 from sqlite3 import Timestamp
 from urllib import request
@@ -201,7 +202,10 @@ class Tracker2API(Resource):
                 tracker.name = new_name
             
             tracker.description = new_description
-                        
+
+            # Handling the options
+            options = db.session.query(Options).filter(Options.tracker_id == )
+
             db.session.commit()
 
             return "Update Successful", 200

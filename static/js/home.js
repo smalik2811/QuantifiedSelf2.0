@@ -28,8 +28,8 @@ Vue.component('tracker', {
                     <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item link-info" href="#">Edit</a>
-                            <a class="dropdown-item link-danger" href="#">Remove</a>
+                            <button @click="updateTracker(name)"class="dropdown-item link-info" type="button">Update</button>
+                            <button @click="removeTracker(name)" class="dropdown-item link-danger" type="button">Remove</button>
                         </div>
                     </div>
                 </div>
@@ -38,7 +38,38 @@ Vue.component('tracker', {
     `,
 
     created(){
-        
+        if (localStorage.getItem('Authentication-Token') == null){
+            window.alert("You are not authorised.\nRedirecting to Login page.")
+            window.location.href = '/login'
+            return
+        }
+    },
+
+    methods:{
+        async removeTracker(tracker_name){
+            fetch('/api/tracker/' + tracker_name,{
+                method: 'delete',
+                headers: {
+                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                },
+            })
+            .then((response) => {
+                if(response.status == 200){
+                    window.location = window.location
+                }else if(response.status == 401){}
+                else if(response.status == 404){
+                    window.alert(response.statusText)
+                }else{
+                    window.alert("Something went wrong.")
+                    vue.userLogout()
+                }
+            })
+        },
+
+        async updateTracker(name){
+            window.location.href = "/tracker/update/" + name
+        }
+
     }
 })
 
@@ -72,6 +103,25 @@ let vue = new Vue({
                 window.alert(response.statusText)
             } 
         },
+
+        async fetchUsers(){
+            await fetch('/api/tracker',{
+                method: 'get',
+                headers: {
+                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                },
+            })
+            .then((response) => {
+                if(response.status == 200){
+                    return response.json()
+                }else if(response.status == 401){}
+                else{
+                    window.alert("Something went wrong.")
+                    userLogout()
+                }
+            })
+            .then((trackers) => this.trackers = trackers);
+        },
     },
     
     created() {
@@ -83,22 +133,7 @@ let vue = new Vue({
         }
 
         // Fetching trackers to show in the dashboard.
-        fetch('/api/tracker',{
-            method: 'get',
-            headers: {
-                'Authentication-Token': localStorage.getItem('Authentication-Token'),
-            },
-        })
-        .then((response) => {
-            if(response.status == 200){
-                return response.json()
-            }else if(response.status == 401){}
-            else{
-                window.alert("Something went wrong.")
-                userLogout()
-            }
-        })
-        .then((trackers) => this.trackers = trackers);
+        this.fetchUsers()
 
         // Fetching user details
         fetch('/api/user', {

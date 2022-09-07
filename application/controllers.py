@@ -14,6 +14,10 @@ def home():
 def signup():
     return render_template("signup.html")
 
-@app.route("/tracker")
+@app.route("/tracker/create")
 def createTracker():
     return render_template("createTracker.html")
+
+@app.route("/tracker/update/<name>")
+def updateTracker(name):
+    return render_template("updateTracker.html")
