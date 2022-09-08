@@ -1,21 +1,14 @@
-from dataclasses import field
-from hmac import digest_size
-from lib2to3.pgen2.token import OP
-from math import exp
-from sqlite3 import Timestamp
-from urllib import request
-from flask_restful import Resource, Api, request
-from flask_restful import fields, marshal_with, marshal
-from flask_restful import reqparse
-from application.validation import BusinessValidationError, NotFoundError, DuplicateResource
-from application.models import *
-from application.database import db
+from datetime import datetime
+from hmac import new
 from flask import current_app as app
-import werkzeug
-from flask import abort
-from flask_security import auth_required
 from flask_login import current_user
-from flask import jsonify
+from flask_restful import (Resource, fields, marshal_with,
+                           reqparse)
+from flask_security import auth_required
+
+from application.database import db
+from application.models import *
+from application.validation import (BusinessValidationError)
 
 # Parser for User
 user_details_parser = reqparse.RequestParser()
@@ -27,7 +20,8 @@ user_details_parser.add_argument('lastName')
 user_details = {
     'first_name' : fields.String,
     'last_name' : fields.String,
-    'email':    fields.String
+    'email':    fields.String,
+    'password': fields.String
 }
 
 log_details = {
@@ -40,6 +34,7 @@ log_details = {
 
 # Parser for Tracker
 tracker_details_parser = reqparse.RequestParser()
+tracker_details_parser.add_argument('id', type=int)
 tracker_details_parser.add_argument('name', required = True)
 tracker_details_parser.add_argument('description')
 tracker_details_parser.add_argument('type', type=int, required = True)
@@ -50,7 +45,15 @@ log_details_parser = reqparse.RequestParser()
 log_details_parser.add_argument('value', required = True)
 log_details_parser.add_argument('note')
 log_details_parser.add_argument('timestamp', required = True)
-log_details_parser.add_argument('Tracker-Id', location='headers', required = True)
+log_details_parser.add_argument('tracker_id', location='headers', required = True)
+
+log_details_parser2 = reqparse.RequestParser()
+log_details_parser2.add_argument('tracker_id', location='headers', required = True)
+
+log_details_parser3 = reqparse.RequestParser()
+log_details_parser3.add_argument('value', required = True)
+log_details_parser3.add_argument('note')
+log_details_parser3.add_argument('timestamp', required = True)
 
 class UserAPI(Resource):
 
@@ -108,7 +111,7 @@ class UserAPI(Resource):
             
             db.session.commit()
 
-            return "Update Successful", 200
+            return "Update Successful", 201
         except:
             return "Unexpected error", 500
         
@@ -133,13 +136,15 @@ class Tracker1API(Resource):
             type = args.get('type')
             options = args.get('options')
             
-            if db.session.query(Tracker).filter(Tracker.name == name).first():
-                raise BusinessValidationError(409, "BE010", "Tracker already exist.")
+            if db.session.query(Tracker).filter((Tracker.name == name) and (Tracker.user_id == current_user.id)).first():
+                return "Tracker already exist", 409
             
             if not 0 < int(type) < 5 : 
-                raise BusinessValidationError(400, "BE011", "Invalid Tracker Type")
-
-            new_tracker = Tracker(name = name, description = description, type = type, user_id = current_user.id)
+                return "Invalid Tracker Type supplied", 400
+            
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            new_tracker = Tracker(name = name, description = description, type = type, user_id = current_user.id, last_modified = dt_string)
             db.session.add(new_tracker)
             db.session.commit()
 
@@ -147,78 +152,111 @@ class Tracker1API(Resource):
 
             if new_tracker:
                 if int(type) == 3:
-                    new_option = Options(tracker_id = new_tracker.id, name = "True")
+                    new_option = Options(tracker_id = new_tracker.id, name = "True", active = 1)
                     db.session.add(new_option)
-                    new_option = Options(tracker_id = new_tracker.id, name = "False")
+                    new_option = Options(tracker_id = new_tracker.id, name = "False", active = 1)
                     db.session.add(new_option)
                 elif int(type) == 4:
                     for option in options:
-                        new_option = Options(tracker_id = new_tracker.id, name = option)
+                        new_option = Options(tracker_id = new_tracker.id, name = option, active = 1)
                         db.session.add(new_option)
                 db.session.commit()
             else:
                 return "Unexpected error", 500
             return "Tracker created Successfuly", 201
         except:
+            new_tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
+            if new_tracker:
+                db.session.delete(new_tracker)
+                db.session.commit()
             return "Unexpected error", 500
     
     @auth_required('token')
     def get(self):
-        trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
-        tracker_list = []
-        for tracker in trackers:
-            tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description})
-        return tracker_list, 200
+        try:
+            trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+            tracker_list = []
+            for tracker in trackers:
+                tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description})
+            return tracker_list, 200
+        except:
+            return "Unexpected error", 500  
 
 class Tracker2API(Resource):
     
     @auth_required('token')
-    def get(self, name):
+    def get(self, id):
+        try:
+            if not id:
+                return "Invalid id supplied", 400   
+            tracker = db.session.query(Tracker).filter(Tracker.id == id).first()
+            if not tracker:
+                return "Tracker not found", 404
+            options_list = []
+            options = db.session.query(Options).filter(Options.tracker_id == tracker.id).all()
+            for option in options:
+                options_list.append(option.name)
+            tracker_dict = {
+                'id' : tracker.id,
+                'name' : tracker.name,
+                'description' : tracker.description,
+                'type' : tracker.type,
+                'options' : options_list
+            }
 
-        tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
-        options_list = []
-        options = db.session.query(Options).filter(Options.tracker_id == tracker.id).all()
-        for option in options:
-            options_list.append(option.name)
-        tracker_dict = {
-            'id' : tracker.id,
-            'name' : tracker.name,
-            'description' : tracker.description,
-            'type' : tracker.type,
-            'options' : options_list
-        }
-
-        return tracker_dict, 200
+            return tracker_dict, 200
+        except: 
+            return "Unexpected error", 500  
 
     @auth_required("token")
-    def patch(self, name):
+    def patch(self, id):
         try:
-            args = tracker_details_parser.parse_args()        
-            new_name = args.get("name", None)
+            args = tracker_details_parser.parse_args()
+            id = tracker_details_parser.get('id')  
+            if not id:
+                return "Invalid id supplied", 400
+            new_name = args.get("name")
             new_description = args.get("description")
-            new_options = args.get("options", None)
-
-            tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
-
-            if new_name:
-                tracker.name = new_name
+            new_options = args.get("options")
+            tracker = db.session.query(Tracker).filter(Tracker.id == id).first()
+            if not tracker:
+                return "Tracker not found.", 404
             
+            same_tracker = db.session.query(Tracker).filter((Tracker.name == new_name) and (Tracker.user_id == current_user.id)).first() 
+            if same_tracker:
+                return "Tracker with the name already exist.", 400
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            tracker.name = new_name
             tracker.description = new_description
+            tracker.last_modified = dt_string
 
-            # Handling the options
-            options = db.session.query(Options).filter(Options.tracker_id == )
-
+            if tracker.type == 4:
+                options = db.session.query(Options).filter(Options.tracker_id == id)
+                for option in options:
+                    option.active = 0
+                for option in new_options:
+                    old_option = db.session.query(Options).filter((Options.tracker_id == id) and (Options.name == options)).first()
+                    if old_option:
+                        old_option.active = 1
+                    else:
+                        new_option = Options(tracker_id = id, name = options, active = 1)
+                        db.session.add(new_option)
             db.session.commit()
 
-            return "Update Successful", 200
+            return "Update Successful", 201
         except:
             return "Unexpected error", 500   
 
 
     @auth_required("token")
-    def delete(self, name):
+    def delete(self, id):
         try:
-            tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
+            if not id:
+                return "Invalid id supplied", 400
+            tracker = db.session.query(Tracker).filter(Tracker.id == id).first()
+            if not tracker:
+                return "Tracker not found.", 404
             db.session.delete(tracker)
             db.session.commit()
             return "Deletion Successful", 200
@@ -229,24 +267,19 @@ class Log1API(Resource):
 
     @auth_required('token')
     def post(self):
-        args = log_details_parser.parse_args()
-        tracker_id = args.get('Tracker-Id', None)    
-        value = args.get("value", None)
-        note = args.get("note")
-        timestamp = args.get("timestamp", None)
-        
-
-        if value is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1002", error_message="password is required")
-
-        if timestamp is None:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1005", error_message="email is required")
-
         try:
+            args = log_details_parser.parse_args()
+            tracker_id = args.get('Tracker-Id')    
+            value = args.get("value")
+            note = args.get("note")
+            timestamp = args.get("timestamp")
+            
+            tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
+            if not tracker:
+                return "Tracker not found.", 404
             new_log = Log(trakcer_id = tracker_id, value = value, note = note, timestamp = timestamp)
             db.session.add(new_log)
+            tracker.last_modified = timestamp
             db.session.commit()
             return "Log created successfully.", 201
         except:
@@ -254,43 +287,59 @@ class Log1API(Resource):
 
     @auth_required('token')
     def get(self):
-        args = log_details_parser.parse_args()
-        tracker_id = args.get('Tracker-Id', None)  
-        logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
-        log_list = []
-        for log in logs:
-            log_list.append({'id': log.id, 'value' : log.value, 'note' : log.note, 'timestamp': log.timestamp})
-        return log_list, 200
+        try:
+            args = log_details_parser2.parse_args()
+            tracker_id = args.get('tracker_id')  
+            tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
+            if not tracker:
+                return "Tracker not found.", 404
+            logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
+            log_list = []
+            for log in logs:
+                log_list.append({'id': log.id, 'value' : log.value, 'note' : log.note, 'timestamp': log.timestamp})
+            return log_list, 200
+        except:
+            return "Unexpected error.", 500
 
-class Log2APPI(Resource):
+class Log2API(Resource):
 
     @auth_required('token')
     @marshal_with(log_details)
     def get(self, id):
-        log = db.session.query(Log).filter(Log.id == id).first()
-        return log, 200
+        try:
+            log = db.session.query(Log).filter(Log.id == id).first()
+            if not log:
+                return "Log not found", 404
+            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+            if not tracker:
+                return "You are not authorised", 401
+            return log, 200
+            
+        except:
+            return "Unexpected error", 500
 
     @auth_required('token')
     def patch(self, id):
         try:
-            args = log_details_parser.parse_args()        
-            value = args.get("value", None)
-            note = args.get("note")
-            timestamp = args.get("timestamp", None)
+            args = log_details_parser3.parse_args()        
+            new_value = args.get("value")
+            new_note = args.get("note")
+            new_timestamp = args.get("timestamp")
 
             log = db.session.query(Log).filter(Log.id == id).first()
-
-            if value:
-                log.value = value
+            if not log:
+                return "Log not found", 404
+            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+            if not tracker:
+                return "You are not authorised", 401
             
-            log.note = note
-
-            if timestamp:
-                log.timestamp = timestamp
+            log.value = new_value
+            log.note = new_note
+            log.timestamp = new_timestamp
                         
             db.session.commit()
 
-            return "Update Successful", 200
+            return "Update Successful", 201
         except:
             return "Unexpected error", 500
 
@@ -298,6 +347,11 @@ class Log2APPI(Resource):
     def delete(self, id):
         try:
             log = db.session.query(Log).filter(Log.id == id).first()
+            if not log:
+                return "Log not found", 404
+            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+            if not tracker:
+                return "You are not authorised", 401
             db.session.delete(log)
             db.session.commit()
             return "Deletion Successful", 200

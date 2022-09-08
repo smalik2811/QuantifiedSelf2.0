@@ -34,7 +34,7 @@ info:
     email: smalik2811@outlook.com
   version: "2.0"
 servers:
-  - url: http://localhost:8080/
+  - url: http://192.168.139.50:8080/api
 tags:
   - name: user
     description: Operations about user
@@ -101,6 +101,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Operation Successful
@@ -137,6 +138,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       requestBody:
         description: Details of the Tracker
         content:
@@ -161,6 +163,8 @@ paths:
           description: Update Successful
         '401':
           description: Unauthorised Access
+        '409':
+          description: Username already exist.
         '500':
           description: Unexpected error.
       
@@ -175,6 +179,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       responses:
         '401':
           description: Unauthorised Access
@@ -222,9 +227,7 @@ paths:
                     type: string
                     example: 4458ECBCD673C3307AC8C3C071CB03E4DA60890556E90F135AF7F92E3B6DC99E
         '400':
-          description: Wrong password supplied
-        '404':
-          description: Username not found.
+          description: Wrong credentials
         '500':
           description: Unexpected error.
   /user/logout:
@@ -239,6 +242,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Logout Successful
@@ -259,6 +263,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       requestBody:
         description: Details of the Tracker to be created.
         content:
@@ -314,6 +319,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Request Successful
@@ -338,7 +344,7 @@ paths:
         '500':
           description: Unexpected error.  
       
-  /tracker/{name}:
+  /tracker/{id}:
     get:
       tags:
         - tracker
@@ -346,16 +352,17 @@ paths:
       description: Logged in user can get the details of the tracker name specified.
       operationId: readTracker
       parameters:
-        - name: name
+        - name: id
           in: path
-          description: Name of the tracker that needs to be read.
+          description: Id of the tracker that needs to be read.
           required: true
           schema:
             type: string
         - in: header
           name: Authentication-Token
           schema:
-            type: string    
+            type: string
+          required: true
       responses:
         '200':
           description: Operation Successful.
@@ -394,16 +401,17 @@ paths:
       description: Logged in user can update the name, description, options of the tracker.
       operationId: updateTracker
       parameters:
-        - name: name
+        - name: id
           in: path
-          description: Name of the tracker that needs to be read.
+          description: Id of the tracker that needs to be read.
           required: true
           schema:
             type: string
         - in: header
           name: Authentication-Token
           schema:
-            type: string      
+            type: string
+          required: true   
       requestBody:
         description: Details of the Tracker
         content:
@@ -436,16 +444,17 @@ paths:
       description: Logged in user can delete the tracker and the corresponding logs.
       operationId: deleteTracker
       parameters:
-        - name: name
+        - name: id
           in: path
-          description: Name of the tracker that needs to be deleted.
+          description: Id of the tracker that needs to be deleted.
           required: true
           schema:
             type: string
         - in: header
           name: Authentication-Token
           schema:
-            type: string 
+            type: string
+          required: true
       responses:
         '404':
           description: Tracker not found.
@@ -464,7 +473,7 @@ paths:
       description: Logged in user can log a Tracker.
       operationId: createLog
       parameters:
-        - name: Tracker-Id
+        - name: tracker_id
           in: header
           schema:
             type: string
@@ -473,6 +482,7 @@ paths:
           name: Authentication-Token
           schema:
             type: string
+          required: true
       requestBody:
         description: Details of the Log
         content:
@@ -518,7 +528,7 @@ paths:
       description: Logged in user can get details of log with the id.
       operationId: readLog
       parameters:
-        - name: Tracker-Id
+        - name: tracker_id
           in: header
           schema:
             type: string
@@ -526,7 +536,8 @@ paths:
         - in: header
           name: Authentication-Token
           schema:
-            type: string   
+            type: string
+          required: true  
       responses:
         '200':
           description: Request Successful
@@ -553,7 +564,7 @@ paths:
         '400':
           description: Invalid id supplied.
         '404':
-          description: Log not found.
+          description: Tracker not found.
         '500':
           description: Unexpected error.
                 
@@ -574,35 +585,30 @@ paths:
         - in: header
           name: Authentication-Token
           schema:
-            type: string 
+            type: string
+          required: true
       responses:
         '200':
           description: Request Successful
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    logId:
-                      type: integer
-                      format: int32
-                    value:
-                      type: string
-                    note:
-                      type: string
-                    timestamp:
-                      type: string
-                example:
-                  - logId: 1001
-                    value: "Cricket"
-                    note: I think I am kinda enjoying Cricket.
-                    timestamp: Wed Aug 10 2022 11:30:38
-                  - logId: 1002
-                    value: "37"
-                    note: Feeling Good.
-                    timestamp: Wed Aug 10 2022 08:00:13
+                
+                type: object
+                properties:
+                  logId:
+                    type: integer
+                    format: int32
+                    example: 1001
+                  value:
+                    type: string
+                    example: "Cricket"
+                  note:
+                    type: string
+                    example: "I think I am kinda enjoying Cricket."
+                  timestamp:
+                    type: string
+                    example: "2022-08-10 At 08:00:13"
         '401':
           description: Unauthorised Access
         '400':
@@ -627,7 +633,8 @@ paths:
         - in: header
           name: Authentication-Token
           schema:
-            type: string    
+            type: string
+          required: true  
       requestBody:
         description: Details of the Log
         content:
@@ -664,19 +671,18 @@ paths:
       parameters:
         - name: id
           in: path
-          description: Name of the tracker to get all the logs.
-          required: true
-          schema:
-            type: string
-        - name: logID
-          in: header
           schema:
             type: integer
             format: int32
           required: true
+        - in: header
+          name: Authentication-Token
+          schema:
+            type: string
+          required: true
       responses:
         '404':
-          description: Tracker not found.
+          description: Log not found.
         '200':
           description: Deletion Successful.
         '401':
