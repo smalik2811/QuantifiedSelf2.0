@@ -64,14 +64,11 @@ class UserAPI(Resource):
         if "@" in email:
             pass
         else:
-            raise BusinessValidationError(
-                status_code=400, error_code="BE1006", error_message="Invalid email")
+            return "Provide valid email", 400
 
         user = db.session.query(User).filter(User.email == email).first()
-
         if user:
-            raise BusinessValidationError(
-                status_code=409, error_code="BE1007", error_message="email already exist.")
+            return "Email already exist.", 409
 
         try:
             new_user = User(email=email, password=password, first_name=firstName, last_name=lastName, fs_uniquifier=email, active=1, role=1)
@@ -98,6 +95,10 @@ class UserAPI(Resource):
             firstName = args.get("firstName")
             lastName = args.get("lastName")
 
+            user = db.session.query(User).filter(User.email == email).first()
+            if user:
+                return "Email already exist.", 409
+            
             logged_user = db.session.query(User).filter(User.email == current_user.email).first()
 
             logged_user.email = email
@@ -117,6 +118,7 @@ class UserAPI(Resource):
             logged_user = db.session.query(User).filter(User.email == current_user.email).first()
             db.session.delete(logged_user)
             db.session.commit()
+            return "Deletion Successful", 200
         except:
             return "Unexpected error", 500
 
