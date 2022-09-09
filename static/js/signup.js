@@ -15,6 +15,7 @@ new Vue({
 
     methods: {
         async signup(){
+            if (this.confirm_password == this.userData.password){
                 fetch('/api/user', {
                     method: 'post',
                     headers: {
@@ -23,7 +24,7 @@ new Vue({
                     body: JSON.stringify(this.userData),
                 })
                 .then((response) => {
-                    if(response.status == 200){
+                    if(response.status == 201){
                         return response.json()
                     }else if(response.status == 400){
                         window.alert(response.statusText)
@@ -39,19 +40,9 @@ new Vue({
                     {
                         window.location.href = '/login';
                     })
-                    .catch((err) =>{
-                        this.c.err = true;
-                        this.c.errmsg = "Network error " + err;
-                    })
+            } else{
+                    window.alert("Passwords entered do not match.")
             }
-    },
-
-    created() {
-        // Redirect to login page if not authorised
-        if (localStorage.getItem('Authentication-Token') == null){
-            window.alert("You are not authorised.\nRedirecting to Login page.")
-            window.location.href = '/login'
-            return
         }
-    }
+    },
 });

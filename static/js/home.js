@@ -3,24 +3,24 @@ Vue.component('tracker', {
         id: '',
         name: '',
         description: '',
-        last_modified: 'Never',
+        last_modified: '',
     },
 
     template:
         `
         <tr>
-            <td>
+            <td style="max-width: 30px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                 <a href="#">{{name}}</a>
             </td>
-            <td>
+            <td style="max-width: 40px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                 {{description}}
             </td>
-            <td>
+            <td style="max-width: 22px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                 {{last_modified}}
             </td>
             <td>
                 <div>
-                    <a href = "#" class = "btn btn-success" type = "button">+</a>
+                    <a v-bind:href="'/log/'+ id" class = "btn btn-success" type = "button">+</a>
                 </div>
             </td>
             <td>
@@ -28,8 +28,8 @@ Vue.component('tracker', {
                     <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
                         <div class="dropdown-menu">
-                            <button @click="updateTracker(name)"class="dropdown-item link-info" type="button">Update</button>
-                            <button @click="removeTracker(name)" class="dropdown-item link-danger" type="button">Remove</button>
+                            <button @click="updateTracker(id)"class="dropdown-item link-info" type="button"><strong>Update</strong></button>
+                            <button @click="removeTracker(id)" class="dropdown-item link-danger" type="button"><strong>Remove</strong></button>
                         </div>
                     </div>
                 </div>
@@ -41,13 +41,12 @@ Vue.component('tracker', {
         if (localStorage.getItem('Authentication-Token') == null){
             window.alert("You are not authorised.\nRedirecting to Login page.")
             window.location.href = '/login'
-            return
         }
     },
 
     methods:{
-        async removeTracker(tracker_name){
-            fetch('/api/tracker/' + tracker_name,{
+        async removeTracker(id){
+            fetch('/api/tracker/' + id,{
                 method: 'delete',
                 headers: {
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -104,7 +103,7 @@ let vue = new Vue({
             } 
         },
 
-        async fetchUsers(){
+        async fetchTrackers(){
             await fetch('/api/tracker',{
                 method: 'get',
                 headers: {
@@ -120,7 +119,16 @@ let vue = new Vue({
                     userLogout()
                 }
             })
-            .then((trackers) => this.trackers = trackers);
+            .then((trackers) => {
+                this.trackers = trackers
+                this.trackers.sort((a,b) => {
+                    if(a.last_modified < b.last_modified){
+                        return 1
+                    }else{
+                        return -1
+                    }
+                })
+            });
         },
     },
     
@@ -133,7 +141,7 @@ let vue = new Vue({
         }
 
         // Fetching trackers to show in the dashboard.
-        this.fetchUsers()
+        this.fetchTrackers()
 
         // Fetching user details
         fetch('/api/user', {

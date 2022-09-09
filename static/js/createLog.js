@@ -1,8 +1,31 @@
-new Vue({
+Vue.component('value-component', {    
+    template:`
+    <div>
+        <label class="form-label">Value</label>
+        <input
+            v-model="trackerValue"
+            @input="$emit('sendvalue', trackerValue);"
+            class="form-control"
+            type="number"/>
+    </div>
+    `,
+    data(){
+        return {
+            trackerValue: Number,
+        }
+    },
+}) 
+
+let app = new Vue({
     el: "#app",
     delimiters: ['${','}'],
     data(){
         return {
+            logData:{
+                value: Number,
+                note: null,
+                timestamp: null,
+            },
             userData: {
                 name: null,
             },
@@ -20,13 +43,6 @@ new Vue({
                 "Boolean": 3,
                 "Multiple Choice": 4,
             },
-            
-            trackerTypes2: {
-                1: "Numerical",
-                2: "Time Duration",
-                3: "Boolean",
-                4: "Multiple Choice"
-            },
 
             misc: {
                 tr_type: null,
@@ -36,6 +52,10 @@ new Vue({
     },
 
     methods: {
+        
+        getvalue: function(value){
+            this.logData.value = value
+        },
 
         selectType: function(type){
             if (type in this.trackerTypes){
@@ -46,14 +66,7 @@ new Vue({
                     this.misc.options = "Option1, Option2, Option3"
                 }else{
                     this.misc.options = null
-                    this.trackerData.options = null
                 }
-            }
-        },
-
-        selectType2: function(type){
-            if (type in this.trackerTypes2){
-                this.misc.tr_type = this.trackerTypes2[type]
             }
         },
 
@@ -77,14 +90,14 @@ new Vue({
             } 
         },
 
-        async updateTracker(){
+        async createTracker(){
 
             if (this.misc.options != null){
                 this.trackerData.options = this.misc.options.split(", ")
             }
 
-            fetch('/api/tracker/' + this.trackerData.id, {
-                method: 'patch',
+            fetch('/api/tracker', {
+                method: 'post',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -139,7 +152,7 @@ new Vue({
             this.userData.name = this.userData.name + " " + user.last_name
         })
 
-        // Fetching tracker data
+        // Fetching tracker details
         {
             let uri = window.location.pathname.split("/")
             this.trackerData.id = uri[uri.length - 1]
@@ -165,14 +178,8 @@ new Vue({
             .then((data) => 
                 {
                     this.trackerData = data
-                    this.selectType2(this.trackerData.type)
-                    this.misc.options = ""
-                    for (let i = 0; i < this.trackerData.options.length - 1; i ++){
-                        this.misc.options += this.trackerData.options[i] + ", "
-                    }
-                    this.misc.options += this.trackerData.options[this.trackerData.options.length-1]
                 }
             )
         }
-    },
+      },
 });

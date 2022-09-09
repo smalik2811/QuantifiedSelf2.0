@@ -177,7 +177,7 @@ class Tracker1API(Resource):
             trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
             tracker_list = []
             for tracker in trackers:
-                tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description})
+                tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description, 'last_modified' : tracker.last_modified})
             return tracker_list, 200
         except:
             return "Unexpected error", 500  
@@ -279,7 +279,9 @@ class Log1API(Resource):
                 return "Tracker not found.", 404
             new_log = Log(trakcer_id = tracker_id, value = value, note = note, timestamp = timestamp)
             db.session.add(new_log)
-            tracker.last_modified = timestamp
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            tracker.last_modified = dt_string
             db.session.commit()
             return "Log created successfully.", 201
         except:
@@ -335,7 +337,9 @@ class Log2API(Resource):
             
             log.value = new_value
             log.note = new_note
-            log.timestamp = new_timestamp
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            tracker.last_modified = dt_string
                         
             db.session.commit()
 
@@ -353,6 +357,9 @@ class Log2API(Resource):
             if not tracker:
                 return "You are not authorised", 401
             db.session.delete(log)
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            tracker.last_modified = dt_string
             db.session.commit()
             return "Deletion Successful", 200
         except:

@@ -21,3 +21,7 @@ def createTracker():
 @app.route("/tracker/update/<name>")
 def updateTracker(name):
     return render_template("updateTracker.html")
+
+@app.route("/log/<string:name>")
+def createLog(name):
+    return render_template("createLog.html")

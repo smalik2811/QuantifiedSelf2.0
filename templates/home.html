@@ -34,7 +34,7 @@
                     <div>
                         <div style="margin-bottom: 15vh;">
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table" style="margin-bottom: 3vh;">
                                     <thead>
                                         <tr>
                                             <th>Tracker</th>
@@ -45,12 +45,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr
+                                        <tr 
                                             v-for="tracker in trackers"
                                             is="tracker"
                                             :name="tracker.name"
                                             :description="tracker.description"
                                             :key="tracker.id"
+                                            :last_modified="tracker.last_modified"
+                                            :id="tracker.id"
                                         ></tr>
                                     </tbody>
                                 </table>

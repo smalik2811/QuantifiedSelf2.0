@@ -12,11 +12,11 @@
 </head>
 
 <body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
-    <div class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
+    <div id="app" class="container" style="background: #ffffff;margin-top: 5vh;border-radius: 18px;">
         <div class="row">
             <div class="col">
                 <div style="padding: 12px;">
-                    <h1 class="text-secondary">Hello, {{user['name']}}</h1>
+                    <h1 class="text-secondary">Hello, ${userData.name}</h1>
                 </div>
             </div>
             <div class="col">
@@ -28,14 +28,21 @@
                 <div>
                     <div style="margin-bottom: 15vh;">
                         <div>
-                            <h4>Log {{tracker['name']}}</h4>
+                            <h4>Log <strong>${trackerData.name}</strong></h4>
                         </div>
                         <div>
-                            <form action="/{{user['username']}}/{{tracker['id']}}/log" method="POST" id="add_log-form">
-                                <div><label class="form-label">When</label><input required name = "when" class="form-control" type="datetime-local"></div>
-                                <div><label class="form-label">Value</label> <input required name = 'value' class='form-control' type='text'> </div>
-                                <div><label class="form-label">Notes</label><textarea required name = "notes" class="form-control"></textarea></div>
-                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><button class="btn btn-success" type="submit">Log it</button></div>
+                            <form action="">
+                                <div><label class="form-label">Timestamp</label>
+                                    <input v-model="logData.timestamp" class="form-control" type="datetime-local">
+                                </div>
+                                <value-component @sendvalue="getvalue"></value-component>
+                                <div>
+                                    <label class="form-label">Note</label>
+                                    <textarea v-model="logData.note" placeholder="Any thing you want to mention about the tracker now..." class="form-control"></textarea>
+                                </div>
+                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;">
+                                    <button class="btn btn-success" type="submit">Log it</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -45,6 +52,8 @@
     </div>
     <script src="../../static/bootstrap/js/bootstrap.min.js"></script>
     <script src="../../static/js/bs-init.js"></script>
+    <script src="../../static/vue/vue.js"></script>
+    <script src="../../static/js/createLog.js"></script>
     
 </body>
 
