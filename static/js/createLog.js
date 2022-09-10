@@ -1,28 +1,121 @@
-Vue.component('value-component', {    
-    template:`
-    <div>
-        <label class="form-label">Value</label>
-        <input
-            v-model="trackerValue"
-            @input="$emit('sendvalue', trackerValue);"
-            class="form-control"
-            type="number"/>
-    </div>
+var numComp = {    
+    template: 
+    `
+        <div>
+            <label class="form-label">Value</label>
+            <input
+                v-model="trackerValue"
+                @input="$emit('sendvalue', trackerValue);"
+                class="form-control"
+                type="number"/>
+        </div>
     `,
     data(){
         return {
-            trackerValue: Number,
+            trackerValue: null,
         }
     },
-}) 
+}
+
+var timeComp = {    
+    template: 
+    `
+        <div>
+            <label class="form-label">Value</label>
+            <div class="mb-3 row">
+                <div class="col-sm-10">
+                    <input v-model="hour" @input="$emit('sendvalue', getValue);" type="range" min="0" max="12" value="0" class="form-range">
+                </div>
+                <label class="col-sm-2 col-form-label"><strong>{{hour}}</strong> Hours</label>
+            </div>
+            <div class="mb-3 row">
+                <div class="col-sm-10">
+                    <input v-model="minute" @input="$emit('sendvalue', getValue);" type="range" min="0" max="59" value="0"class="form-range">
+                </div>
+                <label class="col-sm-2 col-form-label"><strong>{{minute}}</strong> Minutes</label>
+            </div>
+        </div>
+    `,
+    data(){
+        return {
+            hour: 0,
+            minute: 0,
+        }
+    },
+
+    computed: {
+        getValue(){
+            return 60 * parseInt(this.hour) + parseInt(this.minute)
+        },
+    },
+}
+
+var boolComp = {    
+    template: 
+    `
+        <div>
+            <label class="form-label">Value</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" id="trueOption" value="true" v-model="trackerValue" @input="$emit('sendvalue', 'true');">
+                <label class="form-check-label" for="trueOption">
+                    True
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" id="falseOption" value="false" v-model="trackerValue" @input="$emit('sendvalue', 'false');">
+                <label class="form-check-label" for="falseOption">
+                    False
+                </label>
+            </div>
+        </div>
+    `,
+    data(){
+        return {
+            trackerValue: null
+        }
+    },
+}
+
+var multiComp = {    
+    template: 
+    `
+        <div>
+            <label class="form-label">Value</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" id="trueOption" value="true" v-model="trackerValue" @input="$emit('sendvalue', 'true');">
+                <label class="form-check-label" for="trueOption">
+                    True
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" id="falseOption" value="false" v-model="trackerValue" @input="$emit('sendvalue', 'false');">
+                <label class="form-check-label" for="falseOption">
+                    False
+                </label>
+            </div>
+        </div>
+    `,
+    data(){
+        return {
+            trackerValue: null
+        }
+    },
+}
 
 let app = new Vue({
     el: "#app",
     delimiters: ['${','}'],
+    components: {
+        'num-comp': numComp,
+        'time-comp': timeComp,
+        'bool-comp': boolComp,
+        'multi-comp': multiComp,
+    },
     data(){
         return {
+            valueComponent: null,
             logData:{
-                value: Number,
+                value: null,
                 note: null,
                 timestamp: null,
             },
@@ -177,7 +270,25 @@ let app = new Vue({
             })
             .then((data) => 
                 {
-                    this.trackerData = data
+                    this.misc.tr_type = data.type
+                    this.trackerData.name = data.name
+                    switch(this.misc.tr_type){
+                        case 1:
+                            this.valueComponent = 'num-comp'
+                            break;
+                        case 2:
+                            this.valueComponent = 'time-comp'
+                            break;
+                        case 3:
+                            this.valueComponent = 'bool-comp'
+                            break;
+                        case 4:
+                            this.valueComponent = 'multi-comp'
+                            break;
+                        default:
+                            window.alert("Something went wrong.")
+                            window.location.href="/"
+                    }
                 }
             )
         }

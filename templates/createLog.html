@@ -28,14 +28,14 @@
                 <div>
                     <div style="margin-bottom: 15vh;">
                         <div>
-                            <h4>Log <strong>${trackerData.name}</strong></h4>
+                            <h4>Log <strong>${trackerData.name}, ${this.logData.value}</strong></h4>
                         </div>
                         <div>
                             <form action="">
                                 <div><label class="form-label">Timestamp</label>
                                     <input v-model="logData.timestamp" class="form-control" type="datetime-local">
                                 </div>
-                                <value-component @sendvalue="getvalue"></value-component>
+                                <div :is="valueComponent" @sendvalue="getvalue"></div>
                                 <div>
                                     <label class="form-label">Note</label>
                                     <textarea v-model="logData.note" placeholder="Any thing you want to mention about the tracker now..." class="form-control"></textarea>
