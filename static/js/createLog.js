@@ -7,7 +7,8 @@ var numComp = {
                 v-model="trackerValue"
                 @input="$emit('sendvalue', trackerValue);"
                 class="form-control"
-                type="number"/>
+                type="number"
+                required="true"/>
         </div>
     `,
     data(){
@@ -24,13 +25,13 @@ var timeComp = {
             <label class="form-label">Value</label>
             <div class="mb-3 row">
                 <div class="col-sm-10">
-                    <input v-model="hour" @input="$emit('sendvalue', getValue);" type="range" min="0" max="12" value="0" class="form-range">
+                    <input v-model="hour" @input="$emit('sendvalue', getValue);" type="range" min="0" max="12" value="0" required="true" class="form-range">
                 </div>
                 <label class="col-sm-2 col-form-label"><strong>{{hour}}</strong> Hours</label>
             </div>
             <div class="mb-3 row">
                 <div class="col-sm-10">
-                    <input v-model="minute" @input="$emit('sendvalue', getValue);" type="range" min="0" max="59" value="0"class="form-range">
+                    <input v-model="minute" @input="$emit('sendvalue', getValue);" type="range" min="0" max="59" required="true" value="0"class="form-range">
                 </div>
                 <label class="col-sm-2 col-form-label"><strong>{{minute}}</strong> Minutes</label>
             </div>
@@ -56,7 +57,7 @@ var boolComp = {
         <div>
             <label class="form-label">Value</label>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="options" id="trueOption" value="true" v-model="trackerValue" @input="$emit('sendvalue', 'true');">
+                <input class="form-check-input" required="true" type="radio" name="options" id="trueOption" value="true" v-model="trackerValue" @input="$emit('sendvalue', 'true');">
                 <label class="form-check-label" for="trueOption">
                     True
                 </label>
@@ -76,28 +77,27 @@ var boolComp = {
     },
 }
 
-var multiComp = {    
+var multiComp = {  
+    props:{
+        options: null
+    },
     template: 
     `
         <div>
             <label class="form-label">Value</label>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="options" id="trueOption" value="true" v-model="trackerValue" @input="$emit('sendvalue', 'true');">
-                <label class="form-check-label" for="trueOption">
-                    True
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="options" id="falseOption" value="false" v-model="trackerValue" @input="$emit('sendvalue', 'false');">
-                <label class="form-check-label" for="falseOption">
-                    False
-                </label>
+            <div v-for="option in options">
+                <div class="form-check">
+                    <input class="form-check-input" required="true" type="radio" name="trackeroptions" :id="option" :value="option" v-model=trackerValue @input="$emit('sendvalue', option);">
+                    <label class="form-check-label" :for="option">
+                        {{option}}
+                    </label>
+                </div>
             </div>
         </div>
     `,
     data(){
         return {
-            trackerValue: null
+            trackerValue: null,
         }
     },
 }
@@ -123,18 +123,8 @@ let app = new Vue({
                 name: null,
             },
             trackerData: {
-                id: null,
                 name: null,
-                description: null,
-                type: null,
                 options: null,
-            },
-
-            trackerTypes: {
-                "Numerical": 1,
-                "Time Duration": 2,
-                "Boolean": 3,
-                "Multiple Choice": 4,
             },
 
             misc: {
@@ -148,19 +138,6 @@ let app = new Vue({
         
         getvalue: function(value){
             this.logData.value = value
-        },
-
-        selectType: function(type){
-            if (type in this.trackerTypes){
-                this.trackerData.type = this.trackerTypes[type]
-                this.misc.tr_type = type
-                
-                if (this.trackerData.type == 4){
-                    this.misc.options = "Option1, Option2, Option3"
-                }else{
-                    this.misc.options = null
-                }
-            }
         },
 
         async userLogout(){
@@ -183,44 +160,33 @@ let app = new Vue({
             } 
         },
 
-        async createTracker(){
+        async createLog(){
 
-            if (this.misc.options != null){
-                this.trackerData.options = this.misc.options.split(", ")
-            }
-
-            fetch('/api/tracker', {
+            fetch('/api/log', {
                 method: 'post',
                 headers: {
                     'Content-Type': 'application/json',
+                    'trackerid' : this.trackerData.id,
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
                 },
-                body: JSON.stringify(this.trackerData),
+                body: JSON.stringify(this.logData),
             })
             .then((response) => {
                 if(response.status == 201){
-                    return response.json()
+                    window.location.href="/"
                 }else if(response.status == 400){
                     window.alert(response.statusText)
                 }else if(response.status == 401){}
-                else if(response.status == 409){
+                else if(response.status == 404){
+                    window.alert(response.statusText)
+                }else if(response.status == 409){
                     window.alert(response.statusText)
                 }else{
                     window.alert(response.statusText)
                 }
                 
             })
-            .then((data) => 
-                {
-                    window.location.href = '/';
-                })
-        }
-    },
-
-    computed: {
-        multiChoice(){
-          return this.trackerData.type === 4
-      }
+        }    
     },
 
     created() {
@@ -284,6 +250,7 @@ let app = new Vue({
                             break;
                         case 4:
                             this.valueComponent = 'multi-comp'
+                            this.misc.options = data.options
                             break;
                         default:
                             window.alert("Something went wrong.")
@@ -292,5 +259,5 @@ let app = new Vue({
                 }
             )
         }
-      },
+    },
 });

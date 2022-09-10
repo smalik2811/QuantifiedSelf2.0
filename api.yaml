@@ -34,7 +34,7 @@ info:
     email: smalik2811@outlook.com
   version: "2.0"
 servers:
-  - url: http://192.168.139.50:8080/api
+  - url: http://192.168.78.50:8080/api
 tags:
   - name: user
     description: Operations about user

@@ -45,7 +45,7 @@ log_details_parser = reqparse.RequestParser()
 log_details_parser.add_argument('value', required = True)
 log_details_parser.add_argument('note')
 log_details_parser.add_argument('timestamp', required = True)
-log_details_parser.add_argument('tracker_id', location='headers', required = True)
+log_details_parser.add_argument('trackerid', location='headers', required = True)
 
 log_details_parser2 = reqparse.RequestParser()
 log_details_parser2.add_argument('tracker_id', location='headers', required = True)
@@ -269,7 +269,7 @@ class Log1API(Resource):
     def post(self):
         try:
             args = log_details_parser.parse_args()
-            tracker_id = args.get('Tracker-Id')    
+            tracker_id = args.get('trackerid')    
             value = args.get("value")
             note = args.get("note")
             timestamp = args.get("timestamp")
@@ -277,7 +277,7 @@ class Log1API(Resource):
             tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
             if not tracker:
                 return "Tracker not found.", 404
-            new_log = Log(trakcer_id = tracker_id, value = value, note = note, timestamp = timestamp)
+            new_log = Log(tracker_id = tracker_id, value = value, note = note, timestamp = timestamp)
             db.session.add(new_log)
             now = datetime.now()
             dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
