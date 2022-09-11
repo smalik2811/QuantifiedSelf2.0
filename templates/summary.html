@@ -12,11 +12,11 @@
 </head>
 
 <body style="background: linear-gradient(-89deg, rgb(154,56,200), rgb(35,96,241) 98%);">
-    <div class="container" style="background: #ffffff;border-radius: 18px;margin-top: 5vh;">
+    <div id="app" class="container" style="background: #ffffff;border-radius: 18px;margin-top: 5vh;">
         <div class="row">
             <div class="col">
                 <div style="padding: 12px;">
-                    <h1 class="text-secondary">Hello, {{user['name']}}</h1>
+                    <h1 class="text-secondary">Hello, ${name}</h1>
                 </div>
             </div>
             <div class="col">
@@ -27,14 +27,15 @@
             <div class="col-10">
                 <div>
                     <div>
-                        <h4>{{name}} - Tracker</h4>
-                        <h5>{{desc}}</h5>
+                        <h4>${this.trackerData.name} - Tracker</h4>
+                        <h5>${this.trackerData.description}</h5>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col" >
                         <div style="text-align: center;">
-                            <canvas id = "myChart"></canvas>
+                            <!-- This is where graphs comes in. -->
+                            <chart :labels="labels" :data="data"></chart>
                         </div>
                     </div>
                 </div>
@@ -53,34 +54,25 @@
                     </div>
                     <div style="margin-bottom: 15vh;">
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table" style="margin-bottom: 3vh;">
                                 <thead>
                                     <tr>
-                                        <th>On</th>
                                         <th>Value</th>
+                                        <th>Timestamp</th>
                                         <th>Note</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for log in logs %}
-                                    <tr>
-                                        <td>{{log['timestamp']}}</td>
-                                        <td>{{log['value']}}</td>
-                                        <td>{{log['note']}}</td>
-                                        <td>
-                                            <div>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item link-info" href="/{{user['username']}}/log/edit/{{log['id']}}">Edit</a>
-                                                        <a class="dropdown-item link-danger" href="/{{user['username']}}/log/delete/{{log['id']}}">Remove</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor%}
+                                     <tr 
+                                     v-for="log in logs"
+                                     is="log"
+                                     :timestamp="log.timestamp"
+                                     :note="log.note"
+                                     :key="log.id"
+                                     :value="log.value"
+                                     :id="log.id"
+                                 ></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -89,266 +81,12 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        let days = [];
-        {% for label in labels %}
-            days.push('{{label}}');
-        {% endfor %}
-
-        let values = [];
-        {% for data in datas %}
-            values.push({{data}});
-        {% endfor %}
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: days,
-                datasets: [{
-                    label: 'Value',
-                    data: values,
-                    backgroundColor: "#4e73df",
-                    borderColor: "#4e73df"
-                }]
-            },
-            options: {
-                maintainAspectRatio: true,
-                legend: {
-                    display: false,
-                    labels: {
-                        fontStyle: "normal"
-                    },
-                    reverse: false
-                },
-                title: {
-                    fontStyle: "normal",
-                    position: "top",
-                    display: false,
-                    text: "Your Progress"
-                },
-                scales: {
-                    xAxes: [{
-                        ticks: {
-                            fontStyle: "normal"
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            fontStyle: "normal"
-                        }
-                    }]
-                }
-            }
-        });
-
-
-        //Functions to filter the chart:
-        function today(){
-            let temp_days = [];
-            let temp_values = [];
-            const day = new Date().getDate().toString();
-            let month = (new Date().getMonth()+1).toString();
-            if(month.length<2){
-                month = "0" + month;
-            }
-            const year = new Date().getFullYear().toString();
-
-            for (let i = 0; i < days.length; i++){
-                let test_date = days[i];
-                let test_year = test_date.substring(0,4);
-                let test_month = test_date.substring(5,7);
-                let test_day = test_date.substring(8,10);
-                if(test_year == year && test_month == month && test_day == day){
-                    temp_days.push(test_date);
-                    temp_values.push(values[i]);
-                }
-            }
-            console.log(temp_days);
-            console.log(temp_values);
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: temp_days,
-                    datasets: [{
-                        label: 'Value',
-                        data: temp_values,
-                        backgroundColor: "#4e73df",
-                        borderColor: "#4e73df"
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: true,
-                    legend: {
-                        display: false,
-                        labels: {
-                            fontStyle: "normal"
-                        },
-                        reverse: false
-                    },
-                    title: {
-                        fontStyle: "normal",
-                        position: "top",
-                        display: false,
-                        text: "Your Progress"
-                    },
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }]
-                    }
-                }
-            });
-        }
-
-        function week(){
-            let temp_days = [];
-            let temp_values = [];
-            
-            const todayObj = new Date();
-            const todayDate = todayObj.getDate();
-            const todayDay = todayObj.getDay();
-
-            const firstDayOfWeek = new Date(todayObj.setDate(todayDate-todayDay));
-            const lastDayOfWeek = new Date(firstDayOfWeek);
-            lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
-
-            for (let i = 0; i < days.length; i++){
-                let test_date = days[i];
-                let test_day = parseInt(test_date.substring(8,10));
-                let test_month = parseInt(test_date.substring(5,7))-1;
-                test_year = parseInt(test_date.substring(0,4));
-                test_date = new Date();
-                test_date.setDate(test_day);
-                test_date.setFullYear(test_year);
-                test_date.setMonth(test_month);
-                if(test_date >= firstDayOfWeek && test_date <= lastDayOfWeek){
-                    temp_days.push(test_date.toString().substring(4,24));
-                    temp_values.push(values[i]);
-                }
-            }
-            console.log(temp_days);
-            console.log(temp_values);
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: temp_days,
-                    datasets: [{
-                        label: 'Value',
-                        data: temp_values,
-                        backgroundColor: "#4e73df",
-                        borderColor: "#4e73df"
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: true,
-                    legend: {
-                        display: false,
-                        labels: {
-                            fontStyle: "normal"
-                        },
-                        reverse: false
-                    },
-                    title: {
-                        fontStyle: "normal",
-                        position: "top",
-                        display: false,
-                        text: "Your Progress"
-                    },
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }]
-                    }
-                }
-            });
-        }
-
-        function month(){
-            let temp_days = [];
-            let temp_values = [];
-            let month = (new Date().getMonth()+1).toString();
-            if(month.length<2){
-                month = "0" + month;
-            }
-            const year = new Date().getFullYear().toString();
-
-            for (let i = 0; i < days.length; i++){
-                let test_date = days[i];
-                let test_year = test_date.substring(0,4);
-                let test_month = test_date.substring(5,7);
-                if(test_year == year && test_month == month){
-                    temp_days.push(test_date);
-                    temp_values.push(values[i]);
-                }
-            }
-            console.log(temp_days);
-            console.log(temp_values);
-
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: temp_days,
-                    datasets: [{
-                        label: 'Value',
-                        data: temp_values,
-                        backgroundColor: "#4e73df",
-                        borderColor: "#4e73df"
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: true,
-                    legend: {
-                        display: false,
-                        labels: {
-                            fontStyle: "normal"
-                        },
-                        reverse: false
-                    },
-                    title: {
-                        fontStyle: "normal",
-                        position: "top",
-                        display: false,
-                        text: "Your Progress"
-                    },
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                fontStyle: "normal"
-                            }
-                        }]
-                    }
-                }
-            });
-        }
-        </script>
     <script src="../../static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="../../static/js/chart.min.js"></script>
     <script src="../../static/js/bs-init.js"></script>
+    <script src="../static/vue/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <script src="https://unpkg.com/vue-chartjs@3.5.1/dist/vue-chartjs.min.js"></script>
+    <script src="../static/js/summary.js"></script>
 </body>
 
 </html>

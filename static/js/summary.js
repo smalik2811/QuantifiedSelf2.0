@@ -1,40 +1,52 @@
-Vue.component('tracker', {
+Vue.component("chart", {
+    extends: VueChartJs.Scatter,
+    props: {
+        labels: null,
+        data: null,
+    },
+    mounted() {
+        this.renderChart(
+          {
+            labels: this.labels,
+            datasets: [
+              {
+                label: "Data One",
+                backgroundColor: "#f87979",
+                data: this.data,
+              },
+            ],
+          },
+          { responsive: true, maintainAspectRatio: false }
+        );
+    },
+  });
+
+Vue.component('log', {
     props: {
         id: '',
-        name: '',
-        description: '',
-        last_modified: '',
+        value: '',
+        note: '',
+        timestamp: '',
     },
 
     template:
         `
-        <tr>
-            <td style="max-width: 30px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                <a v-bind:href="'/summary/'+ id">{{name}}</a>
-            </td>
-            <td style="max-width: 40px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                {{description}}
-            </td>
-            <td style="max-width: 22px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                {{last_modified}}
-            </td>
-            <td>
-                <div>
-                    <a v-bind:href="'/log/'+ id" class = "btn btn-success" type = "button">+</a>
-                </div>
-            </td>
-            <td>
-                <div>
-                    <div class="dropdown">
-                        <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
-                        <div class="dropdown-menu">
-                            <button @click="updateTracker(id)"class="dropdown-item link-info" type="button"><strong>Update</strong></button>
-                            <button @click="removeTracker(id)" class="dropdown-item link-danger" type="button"><strong>Remove</strong></button>
+            <tr>
+                <td>{{value}}</td>
+                <td style="max-width: 22px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{timestamp}}</td>
+                <td style="max-width: 60px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{note}}</td>
+                <td>
+                    <div>
+                        <div class="dropdown">
+                            <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
+                            <div class="dropdown-menu">
+                            <button @click="updateLog(id)"class="dropdown-item link-info" type="button"><strong>Update</strong></button>
+                            <button @click="removeLog(id)" class="dropdown-item link-danger" type="button"><strong>Remove</strong></button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </td>
-        </tr>
+                </td>
+            </tr>
     `,
 
     created(){
@@ -45,8 +57,8 @@ Vue.component('tracker', {
     },
 
     methods:{
-        async removeTracker(id){
-            fetch('/api/tracker/' + id,{
+        async removeLog(id){
+            fetch('/api/log/' + id,{
                 method: 'delete',
                 headers: {
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -65,8 +77,8 @@ Vue.component('tracker', {
             })
         },
 
-        async updateTracker(id){
-            window.location.href = "/tracker/update/" + id
+        async updateLog(id){
+            window.location.href = "/log/update/" + id
         }
 
     }
@@ -77,8 +89,15 @@ let vue = new Vue({
     delimiters: ['${','}'],
     data(){
         return {
-            name: 'User',
-            trackers: [],
+            name: null,
+            labels: [],
+            data: [],
+            logs: [],
+            trackerData: {
+                id: null,
+                name: null,
+                description: null,
+            }
         }
     },
 
@@ -103,8 +122,10 @@ let vue = new Vue({
             } 
         },
 
-        async fetchTrackers(){
-            await fetch('/api/tracker',{
+        async fetchTracker(){
+            let uri = window.location.pathname.split("/")
+            this.trackerData.id = uri[uri.length - 1]
+            await fetch('/api/tracker/' + this.trackerData.id,{
                 method: 'get',
                 headers: {
                     'Authentication-Token': localStorage.getItem('Authentication-Token'),
@@ -119,17 +140,39 @@ let vue = new Vue({
                     userLogout()
                 }
             })
-            .then((trackers) => {
-                this.trackers = trackers
-                this.trackers.sort((a,b) => {
-                    if(a.last_modified < b.last_modified){
-                        return 1
-                    }else{
-                        return -1
-                    }
+            .then((tracker) => {
+                this.trackerData.name = tracker.name
+                this.trackerData.description = tracker.description
+            });
+        },
+
+        async fetchLogs(){
+    
+            await fetch('/api/log',{
+                method: 'get',
+                headers: {
+                    'Authentication-Token': localStorage.getItem('Authentication-Token'),
+                    'trackerid' : this.trackerData.id,
+                },
+            })
+            .then((response) => {
+                if(response.status == 200){
+                    return response.json()
+                }else if(response.status == 401){}
+                else{
+                    window.alert("Something went wrong.")
+                    userLogout()
+                }
+            })
+            .then((logs) => {
+                this.logs = logs
+                logs.forEach(element => {
+                    this.labels.push(element.timestamp)
+                    this.data.push(element.value)
                 })
             });
         },
+
     },
     
     created() {
@@ -141,8 +184,9 @@ let vue = new Vue({
         }
 
         // Fetching trackers to show in the dashboard.
-        this.fetchTrackers()
-
+        this.fetchTracker()
+        this.fetchLogs()
+        
         // Fetching user details
         fetch('/api/user', {
             method: 'get',
@@ -163,5 +207,5 @@ let vue = new Vue({
             this.name = user.first_name,
             this.name = this.name + " " + user.last_name
         })
-      },
+    },
 });

@@ -18,10 +18,18 @@ def signup():
 def createTracker():
     return render_template("createTracker.html")
 
-@app.route("/tracker/update/<name>")
-def updateTracker(name):
+@app.route("/tracker/update/<int:id>")
+def updateTracker(id):
     return render_template("updateTracker.html")
 
-@app.route("/log/<string:name>")
-def createLog(name):
+@app.route("/log/<int:id>")
+def createLog(id):
     return render_template("createLog.html")
+
+@app.route("/summary/<int:id>")
+def summary(id):
+    return render_template("summary.html")
+
+@app.route("/log/update/<int:id>")
+def updateLog(id):
+    return render_template("updateLog.html")

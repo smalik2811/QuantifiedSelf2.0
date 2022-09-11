@@ -48,7 +48,7 @@ log_details_parser.add_argument('timestamp', required = True)
 log_details_parser.add_argument('trackerid', location='headers', required = True)
 
 log_details_parser2 = reqparse.RequestParser()
-log_details_parser2.add_argument('tracker_id', location='headers', required = True)
+log_details_parser2.add_argument('trackerid', location='headers', required = True)
 
 log_details_parser3 = reqparse.RequestParser()
 log_details_parser3.add_argument('value', required = True)
@@ -291,7 +291,7 @@ class Log1API(Resource):
     def get(self):
         try:
             args = log_details_parser2.parse_args()
-            tracker_id = args.get('tracker_id')  
+            tracker_id = args.get('trackerid')  
             tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
             if not tracker:
                 return "Tracker not found.", 404
@@ -350,10 +350,12 @@ class Log2API(Resource):
     @auth_required('token')
     def delete(self, id):
         try:
+            if not id:
+                return "Invalid id supplied", 400
             log = db.session.query(Log).filter(Log.id == id).first()
             if not log:
                 return "Log not found", 404
-            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+            tracker = db.session.query(Tracker).filter((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
             if not tracker:
                 return "You are not authorised", 401
             db.session.delete(log)
