@@ -1,23 +1,37 @@
 Vue.component("chart", {
-    extends: VueChartJs.Scatter,
-    props: {
-        labels: null,
-        data: null,
+    props:{
+        labelsdata: null,
+        valuedata: null,
     },
+    data(){
+        return {
+            chartData: {
+                labels: this.labelsdata,
+                datasets: [
+                {
+                    label: "Logs",
+                    backgroundColor: "#4e73df",
+                    borderColor: "#4e73df",
+                    data: this.valuedata,
+                },
+                ],
+        },
+            chartOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        ticks : {
+                            beginAtZero : true
+                        },
+                    }],
+                }
+            }
+    }
+    },
+    extends: VueChartJs.Line,
     mounted() {
-        this.renderChart(
-          {
-            labels: this.labels,
-            datasets: [
-              {
-                label: "Data One",
-                backgroundColor: "#f87979",
-                data: this.data,
-              },
-            ],
-          },
-          { responsive: true, maintainAspectRatio: false }
-        );
+        setTimeout(() => { this.renderChart(this.chartData,this.chartOptions) }, 1000);
     },
   });
 
@@ -102,6 +116,32 @@ let vue = new Vue({
     },
 
     methods: {
+        currentDate(){
+            currentDate = new Date();
+            strYear = currentDate.getFullYear()
+            strMonth = function(){
+                month = currentDate.getMonth()+1
+                if(month < 10){
+                    month = "0" + month
+                }
+                return month
+            }()
+            strDay = currentDate.getDate()
+            strDate = strYear + "-" + strMonth + "-" + strDay;
+            return strDate
+        },
+        loadToday(){
+            this.value = []
+            this.data = []
+            this.logs.forEach(element => {
+                if(element.timestamp.substring(0,10) == this.currentDate()){
+                    this.labels.push(element.timestamp)
+                    this.data.push(element.value)
+                }
+            })
+        },
+        loadWeek(){},
+        loadMonth(){},
         async userLogout(){
             let response = await fetch('/api/user/logout', {
                                     method: 'get',

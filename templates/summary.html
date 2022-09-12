@@ -35,14 +35,18 @@
                     <div class="col" >
                         <div style="text-align: center;">
                             <!-- This is where graphs comes in. -->
-                            <chart :labels="labels" :data="data"></chart>
+                            <chart :labelsdata="labels" :valuedata="data"></chart>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col">
                 <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Period&nbsp;</button>
-                    <div class="dropdown-menu"><a class="dropdown-item" onclick="today()">Today</a><a class="dropdown-item" onclick="week();">This Week</a><a class="dropdown-item" onclick="month();">This Month</a></div>
+                    <div class="dropdown-menu">
+                        <button class="dropdown-item" @click="loadToday">Today</button>
+                        <button class="dropdown-item" @click="loadWeek">This Week</button>
+                        <button class="dropdown-item" @click="loadMonth;">This Month</button>
+                    </div>
                 </div>
             </div>
         </div>
