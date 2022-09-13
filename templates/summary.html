@@ -35,7 +35,7 @@
                     <div class="col" >
                         <div style="text-align: center;">
                             <!-- This is where graphs comes in. -->
-                            <chart :labelsdata="labels" :valuedata="data"></chart>
+                            <canvas id = "myChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                     <div class="dropdown-menu">
                         <button class="dropdown-item" @click="loadToday">Today</button>
                         <button class="dropdown-item" @click="loadWeek">This Week</button>
-                        <button class="dropdown-item" @click="loadMonth;">This Month</button>
+                        <button class="dropdown-item" @click="loadMonth">This Month</button>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,6 @@
     <script src="../../static/js/bs-init.js"></script>
     <script src="../static/vue/vue.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-    <script src="https://unpkg.com/vue-chartjs@3.5.1/dist/vue-chartjs.min.js"></script>
     <script src="../static/js/summary.js"></script>
 </body>
 

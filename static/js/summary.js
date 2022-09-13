@@ -1,40 +1,3 @@
-Vue.component("chart", {
-    props:{
-        labelsdata: null,
-        valuedata: null,
-    },
-    data(){
-        return {
-            chartData: {
-                labels: this.labelsdata,
-                datasets: [
-                {
-                    label: "Logs",
-                    backgroundColor: "#4e73df",
-                    borderColor: "#4e73df",
-                    data: this.valuedata,
-                },
-                ],
-        },
-            chartOptions: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    yAxes: [{
-                        ticks : {
-                            beginAtZero : true
-                        },
-                    }],
-                }
-            }
-    }
-    },
-    extends: VueChartJs.Line,
-    mounted() {
-        setTimeout(() => { this.renderChart(this.chartData,this.chartOptions) }, 1000);
-    },
-  });
-
 Vue.component('log', {
     props: {
         id: '',
@@ -104,8 +67,48 @@ let vue = new Vue({
     data(){
         return {
             name: null,
-            labels: [],
-            data: [],
+            ctx: null,
+            chartmeta: {
+                type: 'line',
+                data: {
+                    labels: null,
+                    datasets: [{
+                        label: 'Logs',
+                        data: null,
+                        backgroundColor: "#4e73df",
+                        borderColor: "#4e73df"
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    legend: {
+                        display: false,
+                        labels: {
+                            fontStyle: "normal"
+                        },
+                        reverse: false
+                    },
+                    title: {
+                        fontStyle: "normal",
+                        position: "top",
+                        display: false,
+                        text: "Your Progress"
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                fontStyle: "normal",
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                fontStyle: "normal",
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                },
+            },
             logs: [],
             trackerData: {
                 id: null,
@@ -116,32 +119,62 @@ let vue = new Vue({
     },
 
     methods: {
-        currentDate(){
-            currentDate = new Date();
-            strYear = currentDate.getFullYear()
-            strMonth = function(){
-                month = currentDate.getMonth()+1
+        getMonth(date){
+            month = date.getMonth()+1
                 if(month < 10){
                     month = "0" + month
                 }
                 return month
-            }()
-            strDay = currentDate.getDate()
+        },
+        formatDate(date){
+            date = new Date(date)
+            strYear = date.getFullYear();
+            strMonth = this.getMonth(date)
+            strDay = date.getDate();
             strDate = strYear + "-" + strMonth + "-" + strDay;
             return strDate
         },
         loadToday(){
-            this.value = []
-            this.data = []
+            this.chartmeta.data.labels = []
+            this.chartmeta.data.datasets[0].data = []
             this.logs.forEach(element => {
-                if(element.timestamp.substring(0,10) == this.currentDate()){
-                    this.labels.push(element.timestamp)
-                    this.data.push(element.value)
+                if(element.timestamp.substring(0,10) == this.formatDate(new Date())){
+                    this.chartmeta.data.labels.push(element.timestamp)
+                    this.chartmeta.data.datasets[0].data.push(element.value)
                 }
             })
+            myChart = new Chart(this.ctx, this.chartmeta);
         },
-        loadWeek(){},
-        loadMonth(){},
+        loadWeek(){
+            currentDate = new Date()
+            weekFirstDate = new Date()
+            weekFirstDate.setDate(currentDate.getDate() - currentDate.getDay())
+            weekLastDate = new Date()
+            weekLastDate.setDate(weekFirstDate.getDate() + 6)
+            weekFirstDate = this.formatDate(weekFirstDate)
+            weekLastDate = this.formatDate(weekLastDate)
+
+            this.chartmeta.data.labels = []
+            this.chartmeta.data.datasets[0].data = []
+            this.logs.forEach(element => {
+                if(weekFirstDate <= element.timestamp.substring(0,10) && element.timestamp.substring(0,10) <= weekLastDate){
+                    this.chartmeta.data.labels.push(element.timestamp)
+                    this.chartmeta.data.datasets[0].data.push(element.value)
+                }
+            })
+            myChart = new Chart(this.ctx, this.chartmeta);
+        },
+        loadMonth(){
+            this.chartmeta.data.labels = []
+            this.chartmeta.data.datasets[0].data = []
+            this.logs.forEach(element => {
+                if(element.timestamp.substring(5,7) == this.getMonth(new Date())){
+                    this.chartmeta.data.labels.push(element.timestamp)
+                    this.chartmeta.data.datasets[0].data.push(element.value)
+                }
+            })
+            myChart = new Chart(this.ctx, this.chartmeta);
+        },
         async userLogout(){
             let response = await fetch('/api/user/logout', {
                                     method: 'get',
@@ -206,9 +239,22 @@ let vue = new Vue({
             })
             .then((logs) => {
                 this.logs = logs
+                this.logs.sort((a,b) => {
+                    if(a.timestamp.substring(0,10) < b.timestamp.substring(0,10)){
+                        return -1
+                    }else if (a.timestamp.substring(0,10) ==b.timestamp.substring(0,10)){
+                        if(a.timestamp.substring(11,16) < b.timestamp.substring(11,16)){
+                            return -1
+                        }else{
+                            return 1
+                        }
+                    }else{
+                        return 1
+                    }
+                })
                 logs.forEach(element => {
-                    this.labels.push(element.timestamp)
-                    this.data.push(element.value)
+                    this.chartmeta.data.labels.push(element.timestamp)
+                    this.chartmeta.data.datasets[0].data.push(element.value)
                 })
             });
         },
@@ -248,4 +294,13 @@ let vue = new Vue({
             this.name = this.name + " " + user.last_name
         })
     },
+    async mounted(){
+        this.ctx = document.getElementById('myChart').getContext('2d');
+        
+    },
+    updated: function () {
+        this.$nextTick(function () {
+            myChart = new Chart(this.ctx, this.chartmeta);
+        })
+      }
 });
