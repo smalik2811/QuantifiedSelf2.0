@@ -68,6 +68,8 @@ let vue = new Vue({
         return {
             name: null,
             ctx: null,
+            optionDict: {},
+            labelDict: {},
             chartmeta: {
                 type: 'line',
                 data: {
@@ -81,8 +83,10 @@ let vue = new Vue({
                 },
                 options: null,
             },
+            count: 0,
             logs: [],
             unit: null,
+            loaded: false,
             trackerData: {
                 id: null,
                 name: null,
@@ -245,17 +249,17 @@ let vue = new Vue({
                                 text: "Your Progress"
                             },
                             scales: {
-                                xAxes: [{
+                                x: {
                                     ticks: {
                                         fontStyle: "normal",
                                     }
-                                }],
-                                yAxes: [{
+                                },
+                                y: {
                                     ticks: {
                                         fontStyle: "normal",
                                         beginAtZero: true
                                     }
-                                }]
+                                }
                             }
                         };
                         logs.forEach(element => {
@@ -281,17 +285,17 @@ let vue = new Vue({
                                 text: "Your Progress"
                             },
                             scales: {
-                                xAxes: [{
+                                x: {
                                     ticks: {
                                         fontStyle: "normal",
                                     }
-                                }],
-                                yAxes: [{
+                                },
+                                y: {
                                     ticks: {
                                         fontStyle: "normal",
                                         beginAtZero: true
                                     }
-                                }]
+                                }
                             }
                         };
                         logs.forEach(element => {
@@ -317,7 +321,7 @@ let vue = new Vue({
                                 text: "Your Progress"
                             },
                             scales: {
-                                yAxes: [{
+                                y: {
                                     ticks: {
                                         fontStyle: "normal",
                                         callback: function(label, index, labels) {
@@ -329,7 +333,7 @@ let vue = new Vue({
                                             }
                                         }
                                     }
-                                }]
+                                }
                             }
                         };
                         logs.forEach(element => {
@@ -340,6 +344,51 @@ let vue = new Vue({
                                 this.chartmeta.data.datasets[0].data.push(1)
                             }
                         })
+                        break
+                    case 4:
+                        this.chartmeta.type = "bar"
+                        logs.forEach(element => {
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(! this.optionDict[element.value]){
+                                this.optionDict[element.value] = [this.count * 5 , this.count * 5 + 4]
+                                this.labelDict[this.count] = element.value
+                                this.count = this.count + 1
+                            }
+                            this.chartmeta.data.datasets[0].data.push(this.optionDict[element.value])
+                        })
+                        this.chartmeta.options = {
+                            maintainAspectRatio: true,
+                            legend: {
+                                display: false,
+                                labels: {
+                                    fontStyle: "normal"
+                                },
+                                reverse: false
+                            },
+                            title: {
+                                fontStyle: "normal",
+                                position: "top",
+                                display: false,
+                                text: "Your Progress"
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        min: 0,
+                                        stepSize: 1,
+                                        fontStyle: "normal",
+                                        callback: function(value, index, ticks) {  
+                                            console.log("#1 Value:" + value)  
+                                            let num = value + 1 
+                                            if((num % 5) == 0 && (num / 5) <= 2){
+                                                console.log("#2 Value:" + value)
+                                                return this.labelDict[num/5]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
                         break
                 }
             });
@@ -382,11 +431,8 @@ let vue = new Vue({
     },
     async mounted(){
         this.ctx = document.getElementById('myChart').getContext('2d');
-        
+        setTimeout(() => {
+            new Chart(this.ctx, this.chartmeta)
+           }, 1000);        
     },
-    updated: function () {
-        this.$nextTick(function () {
-            myChart = new Chart(this.ctx, this.chartmeta);
-        })
-      }
 });
