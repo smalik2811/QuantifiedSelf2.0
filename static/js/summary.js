@@ -71,49 +71,23 @@ let vue = new Vue({
             chartmeta: {
                 type: 'line',
                 data: {
-                    labels: null,
+                    labels: [],
                     datasets: [{
                         label: 'Logs',
-                        data: null,
+                        data: [],
                         backgroundColor: "#4e73df",
                         borderColor: "#4e73df"
                     }]
                 },
-                options: {
-                    maintainAspectRatio: true,
-                    legend: {
-                        display: false,
-                        labels: {
-                            fontStyle: "normal"
-                        },
-                        reverse: false
-                    },
-                    title: {
-                        fontStyle: "normal",
-                        position: "top",
-                        display: false,
-                        text: "Your Progress"
-                    },
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                fontStyle: "normal",
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                fontStyle: "normal",
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                },
+                options: null,
             },
             logs: [],
+            unit: null,
             trackerData: {
                 id: null,
                 name: null,
                 description: null,
+                type: null
             }
         }
     },
@@ -216,6 +190,7 @@ let vue = new Vue({
             .then((tracker) => {
                 this.trackerData.name = tracker.name
                 this.trackerData.description = tracker.description
+                this.trackerData.type = tracker.type
             });
         },
 
@@ -252,10 +227,121 @@ let vue = new Vue({
                         return 1
                     }
                 })
-                logs.forEach(element => {
-                    this.chartmeta.data.labels.push(element.timestamp)
-                    this.chartmeta.data.datasets[0].data.push(element.value)
-                })
+                switch(this.trackerData.type){
+                    case 1:
+                        this.chartmeta.options = {
+                            maintainAspectRatio: true,
+                            legend: {
+                                display: false,
+                                labels: {
+                                    fontStyle: "normal"
+                                },
+                                reverse: false
+                            },
+                            title: {
+                                fontStyle: "normal",
+                                position: "top",
+                                display: false,
+                                text: "Your Progress"
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        fontStyle: "normal",
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        fontStyle: "normal",
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        };
+                        logs.forEach(element => {
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            this.chartmeta.data.datasets[0].data.push(element.value)
+                        })
+                        break
+                    case 2:
+                        this.unit=" (mins)"
+                        this.chartmeta.options = {
+                            maintainAspectRatio: true,
+                            legend: {
+                                display: false,
+                                labels: {
+                                    fontStyle: "normal"
+                                },
+                                reverse: false
+                            },
+                            title: {
+                                fontStyle: "normal",
+                                position: "top",
+                                display: false,
+                                text: "Your Progress"
+                            },
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        fontStyle: "normal",
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        fontStyle: "normal",
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        };
+                        logs.forEach(element => {
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            this.chartmeta.data.datasets[0].data.push(element.value)
+                        })
+                        break
+                    case 3:
+                        this.chartmeta.type = "bar"
+                        this.chartmeta.options = {
+                            maintainAspectRatio: true,
+                            legend: {
+                                display: false,
+                                labels: {
+                                    fontStyle: "normal"
+                                },
+                                reverse: false
+                            },
+                            title: {
+                                fontStyle: "normal",
+                                position: "top",
+                                display: false,
+                                text: "Your Progress"
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        fontStyle: "normal",
+                                        callback: function(label, index, labels) {
+                                            switch (label) {
+                                              case -1:
+                                                return 'False';
+                                              case 1:
+                                                return 'True';
+                                            }
+                                        }
+                                    }
+                                }]
+                            }
+                        };
+                        logs.forEach(element => {
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(element.value == "false"){
+                                this.chartmeta.data.datasets[0].data.push(-1)
+                            }else{
+                                this.chartmeta.data.datasets[0].data.push(1)
+                            }
+                        })
+                        break
+                }
             });
         },
 
