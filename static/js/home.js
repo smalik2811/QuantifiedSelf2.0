@@ -163,5 +163,5 @@ let vue = new Vue({
             this.name = user.first_name,
             this.name = this.name + " " + user.last_name
         })
-      },
+    },
 });

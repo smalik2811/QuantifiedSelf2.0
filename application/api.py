@@ -28,7 +28,8 @@ log_details = {
     'id': fields.Integer,
     'value' : fields.String,
     'note' : fields.String,
-    'timestamp': fields.String
+    'timestamp': fields.String,
+    'tracker_id': fields.Integer
 }
 
 
@@ -331,18 +332,17 @@ class Log2API(Resource):
             log = db.session.query(Log).filter(Log.id == id).first()
             if not log:
                 return "Log not found", 404
-            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+            tracker = db.session.query(Tracker).filter((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
             if not tracker:
                 return "You are not authorised", 401
             
             log.value = new_value
             log.note = new_note
+            log.timestamp = new_timestamp
             now = datetime.now()
             dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            tracker.last_modified = dt_string
-                        
+            tracker.last_modified = dt_string        
             db.session.commit()
-
             return "Update Successful", 201
         except:
             return "Unexpected error", 500
