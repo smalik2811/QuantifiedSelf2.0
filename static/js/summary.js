@@ -75,10 +75,11 @@ let vue = new Vue({
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Logs',
+                        label: 'Value',
                         data: [],
                         backgroundColor: "#4e73df",
-                        borderColor: "#4e73df"
+                        borderColor: "#4e73df",
+                        fill: true,
                     }]
                 },
                 options: null,
@@ -380,7 +381,7 @@ let vue = new Vue({
                                         callback: function(value, index, ticks) {  
                                             console.log("#1 Value:" + value)  
                                             let num = value + 1 
-                                            if((num % 5) == 0 && (num / 5) <= 2){
+                                            if((num % 5) == 0 && (num / 5) <= this.count){
                                                 console.log("#2 Value:" + value)
                                                 return this.labelDict[num/5]
                                             }
@@ -433,6 +434,6 @@ let vue = new Vue({
         this.ctx = document.getElementById('myChart').getContext('2d');
         setTimeout(() => {
             new Chart(this.ctx, this.chartmeta)
-           }, 1000);        
+           }, 1000); 
     },
 });
