@@ -114,12 +114,112 @@ let vue = new Vue({
         loadToday(){
             this.chartmeta.data.labels = []
             this.chartmeta.data.datasets[0].data = []
-            this.logs.forEach(element => {
-                if(element.timestamp.substring(0,10) == this.formatDate(new Date())){
-                    this.chartmeta.data.labels.push(element.timestamp)
-                    this.chartmeta.data.datasets[0].data.push(element.value)
-                }
-            })
+            this.optionDict = {}
+            switch(this.trackerData.type){
+                case 3:
+                    this.chartmeta.type = "bar"
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    fontStyle: "normal",
+                                    callback: function(label, index, labels) {
+                                        switch (label) {
+                                            case -1:
+                                            return 'False';
+                                            case 1:
+                                            return 'True';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(0,10) == this.formatDate(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(element.value == "false"){
+                                this.chartmeta.data.datasets[0].data.push(-1)
+                            }else{
+                                this.chartmeta.data.datasets[0].data.push(1)
+                            }
+                        }
+                    })
+                    break
+                case 4:
+                    let count = 0
+                    let labelDict = {}
+                    this.chartmeta.type = "bar"
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(0,10) == this.formatDate(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(! this.optionDict[element.value]){
+                                this.optionDict[element.value] = [count * 5 , count * 5 + 4]
+                                labelDict[count] = element.value
+                                count = count + 1
+                            }
+                            this.chartmeta.data.datasets[0].data.push(this.optionDict[element.value])
+                        }
+                    })
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        plugins: {
+                            tooltip: {
+                                enabled: false
+                            },
+                        },
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    min: 0,
+                                    stepSize: 1,
+                                    fontStyle: "normal",
+                                    callback: function(value, index, ticks) {   
+                                        if((value % 5) == 0 && (value / 5) <= count){
+                                            return labelDict[value/5]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    break
+                default:
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(0,10) == this.formatDate(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            this.chartmeta.data.datasets[0].data.push(element.value)
+                        }
+                    })
+                    break
+            }
             this.myChart.destroy()
             this.myChart = new Chart(this.ctx, this.chartmeta);
         },
@@ -134,24 +234,224 @@ let vue = new Vue({
 
             this.chartmeta.data.labels = []
             this.chartmeta.data.datasets[0].data = []
-            this.logs.forEach(element => {
-                if(weekFirstDate <= element.timestamp.substring(0,10) && element.timestamp.substring(0,10) <= weekLastDate){
-                    this.chartmeta.data.labels.push(element.timestamp)
-                    this.chartmeta.data.datasets[0].data.push(element.value)
-                }
-            })
+            this.optionDict = {}
+            switch(this.trackerData.type){
+                case 3:
+                    this.chartmeta.type = "bar"
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    fontStyle: "normal",
+                                    callback: function(label, index, labels) {
+                                        switch (label) {
+                                            case -1:
+                                            return 'False';
+                                            case 1:
+                                            return 'True';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    this.logs.forEach(element => {
+                        if(weekFirstDate <= element.timestamp.substring(0,10) && element.timestamp.substring(0,10) <= weekLastDate){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(element.value == "false"){
+                                this.chartmeta.data.datasets[0].data.push(-1)
+                            }else{
+                                this.chartmeta.data.datasets[0].data.push(1)
+                            }
+                        }
+                    })
+                    break
+                case 4:
+                    let count = 0
+                    let labelDict = {}
+                    this.chartmeta.type = "bar"
+                    this.logs.forEach(element => {
+                        if(weekFirstDate <= element.timestamp.substring(0,10) && element.timestamp.substring(0,10) <= weekLastDate){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(! this.optionDict[element.value]){
+                                this.optionDict[element.value] = [count * 5 , count * 5 + 4]
+                                labelDict[count] = element.value
+                                count = count + 1
+                            }
+                            this.chartmeta.data.datasets[0].data.push(this.optionDict[element.value])
+                        }
+                    })
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        plugins: {
+                            tooltip: {
+                                enabled: false
+                            },
+                        },
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    min: 0,
+                                    stepSize: 1,
+                                    fontStyle: "normal",
+                                    callback: function(value, index, ticks) {   
+                                        if((value % 5) == 0 && (value / 5) <= count){
+                                            return labelDict[value/5]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    break
+                default:
+                    this.logs.forEach(element => {
+                        if(weekFirstDate <= element.timestamp.substring(0,10) && element.timestamp.substring(0,10) <= weekLastDate){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            this.chartmeta.data.datasets[0].data.push(element.value)
+                        }
+                    })
+                    break
+            }
             this.myChart.destroy()
             this.myChart = new Chart(this.ctx, this.chartmeta);
         },
         loadMonth(){
             this.chartmeta.data.labels = []
             this.chartmeta.data.datasets[0].data = []
-            this.logs.forEach(element => {
-                if(element.timestamp.substring(5,7) == this.getMonth(new Date())){
-                    this.chartmeta.data.labels.push(element.timestamp)
-                    this.chartmeta.data.datasets[0].data.push(element.value)
-                }
-            })
+            this.optionDict = {}
+            switch(this.trackerData.type){
+                case 3:
+                    this.chartmeta.type = "bar"
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    fontStyle: "normal",
+                                    callback: function(label, index, labels) {
+                                        switch (label) {
+                                            case -1:
+                                            return 'False';
+                                            case 1:
+                                            return 'True';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(5,7) == this.getMonth(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(element.value == "false"){
+                                this.chartmeta.data.datasets[0].data.push(-1)
+                            }else{
+                                this.chartmeta.data.datasets[0].data.push(1)
+                            }
+                        }
+                    })
+                    break
+                case 4:
+                    let count = 0
+                    let labelDict = {}
+                    this.chartmeta.type = "bar"
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(5,7) == this.getMonth(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            if(! this.optionDict[element.value]){
+                                this.optionDict[element.value] = [count * 5 , count * 5 + 4]
+                                labelDict[count] = element.value
+                                count = count + 1
+                            }
+                            this.chartmeta.data.datasets[0].data.push(this.optionDict[element.value])
+                        }
+                    })
+                    this.chartmeta.options = {
+                        maintainAspectRatio: true,
+                        plugins: {
+                            tooltip: {
+                                enabled: false
+                            },
+                        },
+                        legend: {
+                            display: false,
+                            labels: {
+                                fontStyle: "normal"
+                            },
+                            reverse: false
+                        },
+                        title: {
+                            fontStyle: "normal",
+                            position: "top",
+                            display: false,
+                            text: "Your Progress"
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    min: 0,
+                                    stepSize: 1,
+                                    fontStyle: "normal",
+                                    callback: function(value, index, ticks) {   
+                                        if((value % 5) == 0 && (value / 5) <= count){
+                                            return labelDict[value/5]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    break
+                default:
+                    this.logs.forEach(element => {
+                        if(element.timestamp.substring(5,7) == this.getMonth(new Date())){
+                            this.chartmeta.data.labels.push(element.timestamp)
+                            this.chartmeta.data.datasets[0].data.push(element.value)
+                        }
+                    })
+                    break
+            }
             this.myChart.destroy()
             this.myChart = new Chart(this.ctx, this.chartmeta);
         },
@@ -387,9 +687,7 @@ let vue = new Vue({
                                         stepSize: 1,
                                         fontStyle: "normal",
                                         callback: function(value, index, ticks) {  
-                                            console.log("#1 Value:" + value)  
                                             if((value % 5) == 0 && (value / 5) <= count){
-                                                console.log("#2 Value:" + value)
                                                 return labelDict[value/5]
                                             }
                                         }
