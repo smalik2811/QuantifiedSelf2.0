@@ -68,6 +68,7 @@ let vue = new Vue({
         return {
             name: null,
             ctx: null,
+            myChart: null,
             optionDict: {},
             chartmeta: {
                 type: 'line',
@@ -85,7 +86,6 @@ let vue = new Vue({
             },
             logs: [],
             unit: null,
-            loaded: false,
             trackerData: {
                 id: null,
                 name: null,
@@ -120,7 +120,8 @@ let vue = new Vue({
                     this.chartmeta.data.datasets[0].data.push(element.value)
                 }
             })
-            myChart = new Chart(this.ctx, this.chartmeta);
+            this.myChart.destroy()
+            this.myChart = new Chart(this.ctx, this.chartmeta);
         },
         loadWeek(){
             currentDate = new Date()
@@ -139,7 +140,8 @@ let vue = new Vue({
                     this.chartmeta.data.datasets[0].data.push(element.value)
                 }
             })
-            myChart = new Chart(this.ctx, this.chartmeta);
+            this.myChart.destroy()
+            this.myChart = new Chart(this.ctx, this.chartmeta);
         },
         loadMonth(){
             this.chartmeta.data.labels = []
@@ -150,7 +152,8 @@ let vue = new Vue({
                     this.chartmeta.data.datasets[0].data.push(element.value)
                 }
             })
-            myChart = new Chart(this.ctx, this.chartmeta);
+            this.myChart.destroy()
+            this.myChart = new Chart(this.ctx, this.chartmeta);
         },
         async userLogout(){
             let response = await fetch('/api/user/logout', {
@@ -359,6 +362,11 @@ let vue = new Vue({
                         })
                         this.chartmeta.options = {
                             maintainAspectRatio: true,
+                            plugins: {
+                                tooltip: {
+                                  enabled: false
+                                },
+                            },
                             legend: {
                                 display: false,
                                 labels: {
@@ -432,7 +440,7 @@ let vue = new Vue({
     async mounted(){
         this.ctx = document.getElementById('myChart').getContext('2d');
         setTimeout(() => {
-            new Chart(this.ctx, this.chartmeta)
+            this.myChart = new Chart(this.ctx, this.chartmeta)
            }, 1000); 
     },
 });
