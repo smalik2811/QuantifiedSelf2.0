@@ -69,7 +69,6 @@ let vue = new Vue({
             name: null,
             ctx: null,
             optionDict: {},
-            labelDict: {},
             chartmeta: {
                 type: 'line',
                 data: {
@@ -84,7 +83,6 @@ let vue = new Vue({
                 },
                 options: null,
             },
-            count: 0,
             logs: [],
             unit: null,
             loaded: false,
@@ -347,13 +345,15 @@ let vue = new Vue({
                         })
                         break
                     case 4:
+                        let count = 0
+                        let labelDict = {}
                         this.chartmeta.type = "bar"
                         logs.forEach(element => {
                             this.chartmeta.data.labels.push(element.timestamp)
                             if(! this.optionDict[element.value]){
-                                this.optionDict[element.value] = [this.count * 5 , this.count * 5 + 4]
-                                this.labelDict[this.count] = element.value
-                                this.count = this.count + 1
+                                this.optionDict[element.value] = [count * 5 , count * 5 + 4]
+                                labelDict[count] = element.value
+                                count = count + 1
                             }
                             this.chartmeta.data.datasets[0].data.push(this.optionDict[element.value])
                         })
@@ -380,10 +380,9 @@ let vue = new Vue({
                                         fontStyle: "normal",
                                         callback: function(value, index, ticks) {  
                                             console.log("#1 Value:" + value)  
-                                            let num = value + 1 
-                                            if((num % 5) == 0 && (num / 5) <= this.count){
+                                            if((value % 5) == 0 && (value / 5) <= count){
                                                 console.log("#2 Value:" + value)
-                                                return this.labelDict[num/5]
+                                                return labelDict[value/5]
                                             }
                                         }
                                     }
