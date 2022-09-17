@@ -1,6 +1,8 @@
-from flask import Flask, request
+from flask import Flask
 from flask import render_template
 from flask import current_app as app
+from application import tasks
+from datetime import datetime
 
 @app.route("/")
 def login():
@@ -33,3 +35,20 @@ def summary(id):
 @app.route("/log/update/<int:id>")
 def updateLog(id):
     return render_template("updateLog.html")
+
+# Test
+@app.route("/hello/<msg>")
+def hello(msg):
+    job = tasks.just_say_hello.delay(msg)
+    result = job.wait()
+    return str(result), 200
+
+@app.route("/time")
+def time():
+    now = datetime.now()
+    print("now in flask=", now)
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print("date and time=", dt_string)
+    job = tasks.print_current_time.apply_async(countdown=10)
+    result = job.wait()
+    return result, 200

@@ -22,3 +22,5 @@ class LocalDevelopmentConfig(Config):
     SECURITY_LOGIN_URL = "/api/user/login"
     SECURITY_LOGOUT_URL = "/api/user/logout"
     SECURITY_BACKWARDS_COMPAT_UNAUTHN = True
+    CELERY_BROKER_URL = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/2"

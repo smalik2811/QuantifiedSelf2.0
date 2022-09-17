@@ -3,3 +3,5 @@ Flask-SQLAlchemy==2.5.1
 flask-restful
 flask-security-too
 bcrypt
+redis
+celery[redis]

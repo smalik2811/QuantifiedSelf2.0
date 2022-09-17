@@ -1,15 +1,16 @@
 import os
+from unittest import result
 from flask import Flask
-from flask_restful import Resource, Api
-from application import config
+from flask_restful import Api
 from application.config import LocalDevelopmentConfig
+from application import workers
 from application.database import db
-from flask_security import Security, SQLAlchemySessionUserDatastore, auth_required, hash_password
+from flask_security import Security, SQLAlchemySessionUserDatastore
 from application.models import User, Role
 
 app = None
 api = None
-
+celery = None
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -21,11 +22,17 @@ def create_app():
     db.init_app(app)
     api = Api(app)
     app.app_context().push()
+    celery = workers.celery
+    celery.conf.update(
+      broker_url = app.config["CELERY_BROKER_URL"],
+      result_backend = app.config["CELERY_RESULT_BACKEND"]
+    )
+    celery.Task = workers.ContextTask
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
     security = Security(app, user_datastore)
-    return app, api
+    return app, api, celery
 
-app, api = create_app()
+app, api, celery = create_app()
 
 # Import all the controllers so they are loaded
 from application.controllers import *
