@@ -1,14 +1,14 @@
 from datetime import datetime
-from hmac import new
 from flask import current_app as app
+import json
 from flask_login import current_user
 from flask_restful import (Resource, fields, marshal_with,
                            reqparse)
 from flask_security import auth_required
+from datetime import datetime
 
 from application.database import db
 from application.models import *
-from application.validation import (BusinessValidationError)
 
 # Parser for User
 user_details_parser = reqparse.RequestParser()
@@ -56,7 +56,7 @@ log_details_parser3.add_argument('value', required = True)
 log_details_parser3.add_argument('note')
 log_details_parser3.add_argument('timestamp', required = True)
 
-class UserAPI(Resource):
+class User1API(Resource):
 
     def post(self):
         args = user_details_parser.parse_args()        
@@ -123,6 +123,26 @@ class UserAPI(Resource):
             db.session.delete(logged_user)
             db.session.commit()
             return "Deletion Successful", 200
+        except:
+            return "Unexpected error", 500
+
+class User2API(Resource):
+    def get(self):
+        try:
+            usersobj = []
+            now = datetime.now()
+            Users = db.session.query(User)
+            for user in Users:
+                tracker = db.session.query(Tracker).filter(Tracker.user_id == User.id).order_by(Tracker.last_modified.desc()).first()
+                dt_string = now.strftime("%Y-%m-%d")
+                print("Current date:", dt_string)
+                print("Last modified:", tracker.last_modified[0:10])
+                if dt_string != tracker.last_modified[0:10]:
+                    userobj = {"firstname": "", "lastname": ""}
+                    userobj["firstname"] = user.first_name
+                    userobj["lastname"] = user.last_name
+                    usersobj+= userobj
+            return json.dumps(usersobj), 200
         except:
             return "Unexpected error", 500
 

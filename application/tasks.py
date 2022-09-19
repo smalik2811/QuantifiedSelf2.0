@@ -9,7 +9,7 @@ def just_say_hello(name):
     return "HELLO {}".format(name)
 
 @celery.task()
-def print_current_time():
+def send_alert():
     print("START")
     now = datetime.now()
     print("now in task=", now)
@@ -21,4 +21,4 @@ def print_current_time():
 @celery.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        crontab(hour=17, minute=0, day_of_week = "*"), print_current_time.s(), name = 'At every 10 seconds')
+        crontab(hour=17, minute=0, day_of_week = "*"), send_alert.s(), name = 'At every 10 seconds')
