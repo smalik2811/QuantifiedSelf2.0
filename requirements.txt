@@ -5,3 +5,4 @@ flask-security-too
 bcrypt
 redis
 celery[redis]
+requests

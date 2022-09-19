@@ -24,3 +24,4 @@ class LocalDevelopmentConfig(Config):
     SECURITY_BACKWARDS_COMPAT_UNAUTHN = True
     CELERY_BROKER_URL = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    CHAT_WEBHOOK_URL = "https://chat.googleapis.com/v1/spaces/AAAAwvcHlMM/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=vn85jvSd-pdPlUMgYhmgb3aemG8BPbmoEDFXby2rVoE%3D"

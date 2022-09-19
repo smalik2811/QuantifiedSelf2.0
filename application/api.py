@@ -129,20 +129,17 @@ class User1API(Resource):
 class User2API(Resource):
     def get(self):
         try:
-            usersobj = []
+            user_list = []
             now = datetime.now()
-            Users = db.session.query(User)
+            Users = db.session.query(User).all()
             for user in Users:
-                tracker = db.session.query(Tracker).filter(Tracker.user_id == User.id).order_by(Tracker.last_modified.desc()).first()
-                dt_string = now.strftime("%Y-%m-%d")
-                print("Current date:", dt_string)
-                print("Last modified:", tracker.last_modified[0:10])
-                if dt_string != tracker.last_modified[0:10]:
-                    userobj = {"firstname": "", "lastname": ""}
-                    userobj["firstname"] = user.first_name
-                    userobj["lastname"] = user.last_name
-                    usersobj+= userobj
-            return json.dumps(usersobj), 200
+                tracker = db.session.query(Tracker).filter(Tracker.user_id == user.id).order_by(Tracker.last_modified.desc()).first()
+                if tracker:
+                    log = db.session.query(Log).filter(Log.tracker_id == tracker.id).order_by(Log.timestamp.desc()).first()
+                    dt_string = now.strftime("%Y-%m-%d")
+                    if dt_string != log.timestamp[0:10]:
+                        user_list.append({'firstname': user.first_name, 'lastname': user.last_name})
+            return user_list, 200
         except:
             return "Unexpected error", 500
 
