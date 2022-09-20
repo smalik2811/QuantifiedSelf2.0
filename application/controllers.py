@@ -2,7 +2,6 @@ from flask import Flask
 from flask import render_template
 from flask import current_app as app
 from application import tasks
-from datetime import datetime
 
 @app.route("/")
 def login():
@@ -43,12 +42,7 @@ def hello(msg):
     result = job.wait()
     return str(result), 200
 
-@app.route("/time")
-def time():
-    now = datetime.now()
-    print("now in flask=", now)
-    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    print("date and time=", dt_string)
-    job = tasks.print_current_time.apply_async(countdown=10)
-    result = job.wait()
-    return result, 200
+@app.route("/mail")
+def mail():
+    tasks.generate_report_send_mail()
+    return "OK",200

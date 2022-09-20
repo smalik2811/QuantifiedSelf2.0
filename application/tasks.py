@@ -1,11 +1,18 @@
+from email.mime.multipart import MIMEMultipart
 from application.workers import celery
 from datetime import datetime
 from celery.schedules import crontab
 import requests
 import json
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email import encoders
 from application.models import User,Tracker,Log
 from application.database import db
 from application.config import LocalDevelopmentConfig
+from jinja2 import Template
 
 @celery.task()
 def just_say_hello(name):
@@ -45,3 +52,53 @@ def post_webhook(data):
 @celery.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(crontab(hour=17, minute=0, day_of_week = "*"), send_alert.s(), name = 'Send alert every evening to log')
+
+@celery.task()
+def send_mail(receiver_address, subject, message, attachment_file = None):
+    msg = MIMEMultipart()
+    msg['From'] = LocalDevelopmentConfig.SENDER_ADDRESS
+    msg['To'] = receiver_address
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(message, "html"))
+     
+    if attachment_file:
+        with open(attachment_file, "rb") as attachment:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header(
+                "Content_Disposition", f"attachment; filename= {attachment_file}",
+            )
+        msg.attach(part)
+
+    s = smtplib.SMTP(host = LocalDevelopmentConfig.SMTP_SERVER_HOST, port = LocalDevelopmentConfig.SMTP_SERVER_PORT)
+    s.login(LocalDevelopmentConfig.SENDER_ADDRESS, LocalDevelopmentConfig.SENDER_PASSWORD)
+    s.send_message(msg)
+    s.quit()
+    return True
+
+@celery.task()
+def generate_report_send_mail():
+    path = os.path.realpath(__file__).replace("application", "templates")
+    path = path.split("/")
+    path = path[:-1]
+    file_path = ""
+    for x in path:
+        file_path = file_path + "/" + x
+    file_path = file_path[1:] + "/monthly_report.html"
+    # For each individual create the report and mail it.
+    users = db.session.query(User).all()
+    for user in users:
+        #Generate the report here
+        with open(file_path) as file_:
+            template = Template(file_.read())
+            message = template.render(data = user)
+        report = None
+        subject = "Monthly Report"
+
+        send_mail(receiver_address = user.email, subject = subject, message = message, attachment_file=report)
+
+@celery.on_after_finalize.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(crontab(day_of_month=1, hour=20), send_alert.s(), name = 'Send Monthly Report')
