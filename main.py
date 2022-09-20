@@ -41,8 +41,7 @@ from application.controllers import *
 
 # Add all restful controllers
 from application.api import *
-api.add_resource(User1API, "/api/user")
-api.add_resource(User2API, "/api/users")
+api.add_resource(UserAPI, "/api/user")
 api.add_resource(Tracker2API,"/api/tracker/<int:id>")
 api.add_resource(Tracker1API, "/api/tracker")
 api.add_resource(Log1API, "/api/log")
