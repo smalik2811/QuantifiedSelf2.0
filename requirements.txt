@@ -6,3 +6,5 @@ bcrypt
 redis
 celery[redis]
 requests
+jinja2
+weasyprint==52.5

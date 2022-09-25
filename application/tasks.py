@@ -1,4 +1,5 @@
 from email.mime.multipart import MIMEMultipart
+from fileinput import filename
 from application.workers import celery
 from datetime import datetime
 from celery.schedules import crontab
@@ -13,6 +14,8 @@ from application.models import User,Tracker,Log
 from application.database import db
 from application.config import LocalDevelopmentConfig
 from jinja2 import Template
+from weasyprint import HTML
+import uuid
 
 @celery.task()
 def just_say_hello(name):
@@ -79,6 +82,23 @@ def send_mail(receiver_address, subject, message, attachment_file = None):
     return True
 
 @celery.task()
+def generate_report(user=None):
+    path = os.path.realpath(__file__).replace("application", "templates")
+    path = path.split("/")
+    path = path[:-1]
+    file_path = ""
+    for x in path:
+        file_path = file_path + "/" + x
+    file_path = file_path[1:] + "/report_template.html"
+    with open(file_path) as file_:
+        template = Template(file_.read())
+        message = template.render(data = user)
+    html = HTML(string = message)
+    file_name = str(uuid.uuid4()) + ".pdf"
+    html.write_pdf(target = file_name)
+    
+
+@celery.task()
 def generate_report_send_mail():
     path = os.path.realpath(__file__).replace("application", "templates")
     path = path.split("/")
@@ -101,4 +121,5 @@ def generate_report_send_mail():
 
 @celery.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(crontab(day_of_month=1, hour=20), send_alert.s(), name = 'Send Monthly Report')
+    # sender.add_periodic_task(crontab(day_of_month=1, hour=20), send_alert.s(), name = 'Send Monthly Report')
+    sender.add_periodic_task(crontab(minute=15, hour=16), generate_report.s(), name = 'Send Monthly Report')
