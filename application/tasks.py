@@ -98,7 +98,7 @@ def generate_report(user):
     all_trackers = db.session.query(MonthHistroy).all()
     trackers = []
     for tracker in all_trackers:
-        trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user.id))
+        trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user['id']))
     message = template.render(user = user, misc = misc)
     html = HTML(string = message)
     file_name = str(uuid.uuid4()) + ".pdf"
