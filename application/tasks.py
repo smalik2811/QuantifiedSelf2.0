@@ -94,7 +94,6 @@ def generate_report(user):
     for x in path:
         file_path = file_path + "/" + x
     file_path = file_path[1:] + "/report.html"
-    print(file_path)
     with open(file_path) as file_:
         template = Template(file_.read())
     misc = {
@@ -114,9 +113,6 @@ def generate_report(user):
     logs = []
     for tracker in all_trackers:
         trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user.id).first())
-        logsall = db.session.query(Log).filter(Log.tracker_id == tracker.tracker_id).all()
-        for log in logsall:
-            logs.append(log)
     for tracker in trackers:
         misc['newcount'] += 1
         type = tracker.type
@@ -132,11 +128,17 @@ def generate_report(user):
         elif type == 4:
             misc['multicount'] += 1
             misc['multitrackers'] = misc['multitrackers'] + tracker.name + ","
+    trackers = []
+    all_trackers = db.session.query(Tracker).filter(Tracker.user_id == user.id).all()
+    for tracker in all_trackers:
+        trackers.append(tracker)
+        logsall = db.session.query(Log).filter(Log.tracker_id == tracker.id and Log.timestamp[5:7] == (int(str(date.today())[5:7])-1)).all()
+        for log in logsall:
+            logs.append(log)
     message = template.render(user = user, misc = misc, trackers = trackers, logs = logs)
     html = HTML(string = message)
     file_name = str(uuid.uuid4()) + ".pdf"
     file_path = file_path.replace("report.html", file_name)
-    print(file_path)
     css = CSS(filename = file_path.replace(file_name, "report.css"))
     html.write_pdf(target = file_path, stylesheets=[css])
     return file_path
