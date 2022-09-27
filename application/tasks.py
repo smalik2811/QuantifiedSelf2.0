@@ -10,11 +10,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email import encoders
-from application.models import User,Tracker,Log
+from application.models import User,Tracker,Log, MonthHistroy
 from application.database import db
 from application.config import LocalDevelopmentConfig
 from jinja2 import Template
-from weasyprint import HTML
+from weasyprint import HTML, CSS
 import uuid
 
 @celery.task()
@@ -53,8 +53,9 @@ def post_webhook(data):
 
 
 @celery.on_after_finalize.connect
-def setup_periodic_tasks(sender, **kwargs):
+def alert(sender, **kwargs):
     sender.add_periodic_task(crontab(hour=17, minute=0, day_of_week = "*"), send_alert.s(), name = 'Send alert every evening to log')
+    sender.add_periodic_task(crontab(minute="*", hour=11), generate_report.s(), name = 'Send Monthly Report')
 
 @celery.task()
 def send_mail(receiver_address, subject, message, attachment_file = None):
@@ -82,20 +83,30 @@ def send_mail(receiver_address, subject, message, attachment_file = None):
     return True
 
 @celery.task()
-def generate_report(user=None):
-    path = os.path.realpath(__file__).replace("application", "templates")
+def generate_report(user):
+    path = os.path.realpath(__file__).replace("application", "report")
     path = path.split("/")
     path = path[:-1]
     file_path = ""
     for x in path:
         file_path = file_path + "/" + x
-    file_path = file_path[1:] + "/report_template.html"
+    file_path = file_path[1:] + "/report.html"
+    print(file_path)
     with open(file_path) as file_:
         template = Template(file_.read())
-        message = template.render(data = user)
+    misc = {}
+    all_trackers = db.session.query(MonthHistroy).all()
+    trackers = []
+    for tracker in all_trackers:
+        trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user.id))
+    message = template.render(user = user, misc = misc)
     html = HTML(string = message)
     file_name = str(uuid.uuid4()) + ".pdf"
-    html.write_pdf(target = file_name)
+    file_path = file_path.replace("report.html", file_name)
+    print(file_path)
+    css = CSS(filename = file_path.replace(file_name, "report.css"))
+    html.write_pdf(target = file_path, stylesheets=[css])
+    return file_path
     
 
 @celery.task()
@@ -119,7 +130,7 @@ def generate_report_send_mail():
 
         send_mail(receiver_address = user.email, subject = subject, message = message, attachment_file=report)
 
-@celery.on_after_finalize.connect
-def setup_periodic_tasks(sender, **kwargs):
+# @celery.on_after_finalize.connect
+# def report(sender, **kwargs):
     # sender.add_periodic_task(crontab(day_of_month=1, hour=20), send_alert.s(), name = 'Send Monthly Report')
-    sender.add_periodic_task(crontab(minute=15, hour=16), generate_report.s(), name = 'Send Monthly Report')
+    # sender.add_periodic_task(crontab(minute="*", hour=12), generate_report.s(), name = 'Send Monthly Report')

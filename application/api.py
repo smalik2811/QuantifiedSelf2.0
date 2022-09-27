@@ -158,6 +158,8 @@ class Tracker1API(Resource):
                     for option in options:
                         new_option = Options(tracker_id = new_tracker.id, name = option, active = 1)
                         db.session.add(new_option)
+                new_histroy = MonthHistroy(tracker_id = new_tracker.id)
+                db.session.add(new_histroy)
                 db.session.commit()
             else:
                 return "Unexpected error", 500

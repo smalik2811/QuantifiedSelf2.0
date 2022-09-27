@@ -25,10 +25,10 @@ def create_app():
     celery = workers.celery
     celery.conf.update(
       broker_url = app.config["CELERY_BROKER_URL"],
-      result_backend = app.config["CELERY_RESULT_BACKEND"]
+      result_backend = app.config["CELERY_RESULT_BACKEND"],
+      enable_utc = False,
+      timezone = "Asia/Calcutta"
     )
-    celery.conf.enable_utc = False
-    celery.conf.timezone = "Asia/Calcutta"
     celery.Task = workers.ContextTask
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
     security = Security(app, user_datastore)
