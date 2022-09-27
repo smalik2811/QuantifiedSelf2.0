@@ -1,7 +1,6 @@
-from email.mime.multipart import MIMEMultipart
 from fileinput import filename
 from application.workers import celery
-from datetime import datetime
+from datetime import datetime, date
 from celery.schedules import crontab
 import requests
 import json
@@ -16,6 +15,9 @@ from application.config import LocalDevelopmentConfig
 from jinja2 import Template
 from weasyprint import HTML, CSS
 import uuid
+from dateutil.relativedelta import relativedelta
+from email.mime.base import MIMEBase
+
 
 @celery.task()
 def just_say_hello(name):
@@ -80,6 +82,7 @@ def send_mail(receiver_address, subject, message, attachment_file = None):
     s.login(LocalDevelopmentConfig.SENDER_ADDRESS, LocalDevelopmentConfig.SENDER_PASSWORD)
     s.send_message(msg)
     s.quit()
+    os.remove(attachment_file)
     return True
 
 @celery.task()
@@ -94,12 +97,42 @@ def generate_report(user):
     print(file_path)
     with open(file_path) as file_:
         template = Template(file_.read())
-    misc = {}
+    misc = {
+        'numcount': 0,
+        'boolcount': 0,
+        'durcount': 0,
+        'multicount': 0, 
+        'newcount': 0, 
+        'month': (date.today() - relativedelta(months=1)).strftime("%B"),
+        'numtrackers': "",
+        'booltrackers': "",
+        'durtrackers': "",
+        'multitrackers': "",
+        }
     all_trackers = db.session.query(MonthHistroy).all()
     trackers = []
+    logs = []
     for tracker in all_trackers:
-        trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user['id']))
-    message = template.render(user = user, misc = misc)
+        trackers.append(db.session.query(Tracker).filter(Tracker.id == tracker.tracker_id and Tracker.user_id == user.id).first())
+        logsall = db.session.query(Log).filter(Log.tracker_id == tracker.tracker_id).all()
+        for log in logsall:
+            logs.append(log)
+    for tracker in trackers:
+        misc['newcount'] += 1
+        type = tracker.type
+        if type == 1:
+            misc['numcount'] += 1
+            misc['numtrackers'] = misc['numtrackers'] + tracker.name + ","
+        elif type == 2:
+            misc['durcount'] += 1
+            misc['durtrackers'] = misc['durtrackers'] + tracker.name + ","
+        elif type == 3:
+            misc['boolcount'] += 1
+            misc['booltrackers'] = misc['booltrackers'] + tracker.name + ","
+        elif type == 4:
+            misc['multicount'] += 1
+            misc['multitrackers'] = misc['multitrackers'] + tracker.name + ","
+    message = template.render(user = user, misc = misc, trackers = trackers, logs = logs)
     html = HTML(string = message)
     file_name = str(uuid.uuid4()) + ".pdf"
     file_path = file_path.replace("report.html", file_name)
@@ -125,12 +158,13 @@ def generate_report_send_mail():
         with open(file_path) as file_:
             template = Template(file_.read())
             message = template.render(data = user)
-        report = None
+        report = generate_report(user = user)
         subject = "Monthly Report"
 
         send_mail(receiver_address = user.email, subject = subject, message = message, attachment_file=report)
+    db.session.query(MonthHistroy).delete()
+    db.session.commit()
 
-# @celery.on_after_finalize.connect
-# def report(sender, **kwargs):
-    # sender.add_periodic_task(crontab(day_of_month=1, hour=20), send_alert.s(), name = 'Send Monthly Report')
-    # sender.add_periodic_task(crontab(minute="*", hour=12), generate_report.s(), name = 'Send Monthly Report')
+@celery.on_after_finalize.connect
+def report(sender, **kwargs):
+    sender.add_periodic_task(crontab(day_of_month=1, hour=0), generate_report_send_mail.s(), name = 'Send Monthly Report')

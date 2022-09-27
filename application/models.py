@@ -59,4 +59,4 @@ class TrackerType(db.Model):
 
 class MonthHistroy(db.Model):
     __tablename__ = 'month_history'
-    tracker_id = db.Column(db.Integer, primary_key=True, db.ForeignKey("tracker.id") ,nullable = False)
+    tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id") , primary_key=True, nullable = False)

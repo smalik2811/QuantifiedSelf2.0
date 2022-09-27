@@ -46,8 +46,3 @@ def hello(msg):
 def mail():
     tasks.generate_report_send_mail()
     return "OK",200
-
-@app.route("/report")
-def report():
-    tasks.generate_report()
-    return "OK",200
