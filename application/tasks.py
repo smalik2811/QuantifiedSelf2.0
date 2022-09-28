@@ -185,3 +185,16 @@ def export_tracker(id):
         writer.writerow([log.timestamp, log.value, log.note])
     file.close()
     return path
+
+@celery.task()
+def export_log(id):
+    log = db.session.query(Log).filter(Log.id == id).first()
+    path = os.path.realpath(__file__).replace("application", "temp")
+    path = path[:-8] + str(uuid.uuid4()) + ".csv"
+    file = open(path, 'w')
+    writer = csv.writer(file)
+    header = ['timestamp', 'value', 'note']
+    writer.writerow(header)
+    writer.writerow([log.timestamp, log.value, log.note])
+    file.close()
+    return path

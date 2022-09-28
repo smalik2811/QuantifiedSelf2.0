@@ -41,11 +41,20 @@ def exportTracker(id):
     try:
         job = tasks.export_tracker.delay(id)
         file = job.wait()
-        return send_file(file, attachment_filename = (str(id) + ".csv"))
+        return send_file(file, attachment_filename = "Tracker-"+(str(id) + ".csv"))
         os.remove(file)
     except Exception as e:
         return str(e)
 
+@app.route("/log/export/<int:id>")
+def exportLog(id):
+    try:
+        job = tasks.export_log.delay(id)
+        file = job.wait()
+        return send_file(file, attachment_filename = "Log-"+(str(id) + ".csv"))
+        os.remove(file)
+    except Exception as e:
+        return str(e)
 
 # Test
 @app.route("/hello/<msg>")
