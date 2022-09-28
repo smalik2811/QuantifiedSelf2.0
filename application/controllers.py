@@ -1,8 +1,9 @@
 from flask import Flask
-from flask import render_template, send_file
+from flask import render_template, send_file, request
 from flask import current_app as app
 from application import tasks
 import os
+from werkzeug import secure_filename
 
 @app.route("/")
 def login():
@@ -55,6 +56,15 @@ def exportLog(id):
         os.remove(file)
     except Exception as e:
         return str(e)
+
+@app.route("/tracker/import/<int:id>", methods = ['POST'])
+def uploadTracker(id):
+    if request.method == 'POST':
+        file = request.files['file']
+        path = os.path.realpath(__file__).replace("application", "temp")
+        uploads_dir = path[:-8]
+        file.save(os.path.join(uploads_dir, secure_filename(file.name)))
+    return home()
 
 # Test
 @app.route("/hello/<msg>")

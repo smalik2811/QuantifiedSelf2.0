@@ -22,7 +22,7 @@
             <div class="col">
                 <div style="text-align: right;padding: 12px;">
                     <a v-bind:href="'/tracker/export/'+ this.trackerData.id" target="blank" class='btn btn-primary'>Export</a>
-                    <button @click="userLogout" class="btn btn-danger" type="button">Logout</button>
+                    <button @click="userLogout()" class="btn btn-danger" type="button">Logout</button>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
                     <div>
                         <h4>Logs</h4>
                     </div>
-                    <div style="margin-bottom: 15vh;">
+                    <div style="margin-bottom: 0vh;">
                         <div class="table-responsive">
                             <table class="table" style="margin-bottom: 3vh;">
                                 <thead>
@@ -84,6 +84,35 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 2vh;">
+            <div class="col-md-12">
+                <div style="margin-bottom: 15vh;">
+                    <div class="mb-3">
+                        <div class="accordion" id="accordionExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Import Logs
+                                </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <form id="upload-file" method="post" enctype="multipart/form-data"></form>
+                                            <label for="formFile" class="form-label">Upload a CSV file containing logs</label>
+                                            <div class="input-group mb-3">
+                                                <input class="form-control" type="file" accept=".csv" id="fileupload" name="fileupload" aria-describedby="button-addon2">
+                                                <button id="button-addon2" @click="uploadLog()" type="button" class="btn btn-primary">Upload</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        </div>
                 </div>
             </div>
         </div>
