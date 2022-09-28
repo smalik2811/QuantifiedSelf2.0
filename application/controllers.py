@@ -1,7 +1,8 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template, send_file
 from flask import current_app as app
 from application import tasks
+import os
 
 @app.route("/")
 def login():
@@ -34,6 +35,17 @@ def summary(id):
 @app.route("/log/update/<int:id>")
 def updateLog(id):
     return render_template("updateLog.html")
+
+@app.route("/tracker/export/<int:id>")
+def exportTracker(id):
+    try:
+        job = tasks.export_tracker.delay(id)
+        file = job.wait()
+        return send_file(file, attachment_filename = (str(id) + ".csv"))
+        os.remove(file)
+    except Exception as e:
+        return str(e)
+
 
 # Test
 @app.route("/hello/<msg>")

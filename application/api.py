@@ -6,6 +6,7 @@ from flask_security import auth_required
 from datetime import datetime
 from application.database import db
 from application.models import *
+from application import tasks
 
 # Parser for User
 user_details_parser = reqparse.RequestParser()
@@ -365,3 +366,19 @@ class Log2API(Resource):
             return "Deletion Successful", 200
         except:
             return "Unexpected error", 500       
+
+class EXPORTAPI1(Resource):
+    @auth_required('token')
+    def get(self,id):
+        try:
+            tracker = db.session.query(Tracker).filter(Tracker.id == id and Tracker.user_id == current_user.id).first()
+            if not tracker:
+                return "Log not found", 404
+            logs = db.session.query(Log).filter(Log.tracker_id == tracker.id).all()
+            jsonlog = []
+            for log in logs:
+                jsonlog.append([log.timestamp, log.value, log.note])
+            tasks.export.delay(jsonlog)
+            return "Successful", 200  
+        except:
+            return "Unexpected error", 500

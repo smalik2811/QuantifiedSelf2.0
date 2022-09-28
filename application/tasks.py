@@ -5,6 +5,7 @@ from celery.schedules import crontab
 import requests
 import json
 import os
+import csv
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -170,3 +171,17 @@ def generate_report_send_mail():
 @celery.on_after_finalize.connect
 def report(sender, **kwargs):
     sender.add_periodic_task(crontab(day_of_month=1, hour=0), generate_report_send_mail.s(), name = 'Send Monthly Report')
+
+@celery.task()
+def export_tracker(id):
+    logs = db.session.query(Log).filter(Log.tracker_id == id).all()
+    path = os.path.realpath(__file__).replace("application", "temp")
+    path = path[:-8] + str(uuid.uuid4()) + ".csv"
+    file = open(path, 'w')
+    writer = csv.writer(file)
+    header = ['timestamp', 'value', 'note']
+    writer.writerow(header)
+    for log in logs:
+        writer.writerow([log.timestamp, log.value, log.note])
+    file.close()
+    return path
