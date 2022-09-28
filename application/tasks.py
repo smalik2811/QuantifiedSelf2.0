@@ -1,4 +1,5 @@
 from fileinput import filename
+from sqlite3 import Timestamp
 from application.workers import celery
 from datetime import datetime, date
 from celery.schedules import crontab
@@ -198,3 +199,14 @@ def export_log(id):
     writer.writerow([log.timestamp, log.value, log.note])
     file.close()
     return path
+
+@celery.task()
+def import_log(path, tracker_id):
+    file = open(path, 'r')
+    reader = csv.reader(file)
+    fields = next(reader)
+    for row in reader:
+        log = Log(tracker_id = tracker_id, value = row[1], note = row[2], timestamp = row[0])
+        db.session.add(log)
+        db.session.commit()
+    os.remove(path)
