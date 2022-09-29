@@ -1,5 +1,4 @@
 import os
-from unittest import result
 from flask import Flask
 from flask_restful import Api
 from application.config import LocalDevelopmentConfig
@@ -7,10 +6,12 @@ from application import workers
 from application.database import db
 from flask_security import Security, SQLAlchemySessionUserDatastore
 from application.models import User, Role
+from flask_caching import Cache
 
 app = None
 api = None
 celery = None
+cache = None
 
 def create_app():
     app = Flask(__name__, template_folder="templates")
@@ -32,15 +33,17 @@ def create_app():
     celery.Task = workers.ContextTask
     user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
     security = Security(app, user_datastore)
-    return app, api, celery
+    cache = Cache(app)
+    app.app_context().push()
+    return app, api, celery, cache
 
-app, api, celery = create_app()
+app, api, celery , cache = create_app()
 
 # Import all the controllers so they are loaded
 from application.controllers import *
 
 # Add all restful controllers
-from application.api import *
+from application.api import UserAPI, Tracker1API, Tracker2API, Log1API, Log2API
 api.add_resource(UserAPI, "/api/user")
 api.add_resource(Tracker2API,"/api/tracker/<int:id>")
 api.add_resource(Tracker1API, "/api/tracker")

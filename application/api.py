@@ -6,7 +6,7 @@ from flask_security import auth_required
 from datetime import datetime
 from application.database import db
 from application.models import *
-from application import tasks
+import main
 
 # Parser for User
 user_details_parser = reqparse.RequestParser()
@@ -54,6 +54,82 @@ log_details_parser3.add_argument('value', required = True)
 log_details_parser3.add_argument('note')
 log_details_parser3.add_argument('timestamp', required = True)
 
+@main.cache.memoize(timeout = 30)
+def getUser(current_user):
+    try:
+        return current_user, 200
+    except:
+        return "Unexpected error", 500
+
+@main.cache.memoize(timeout = 30)
+def getTrackers(current_user):
+    try:
+        trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
+        tracker_list = []
+        for tracker in trackers:
+            tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description, 'last_modified' : tracker.last_modified})
+        return tracker_list, 200
+    except:
+        return "Unexpected error", 500
+
+@main.cache.memoize(timeout = 30)
+def getTracker(current_user,id):
+    try:
+        if not id:
+            return "Invalid id supplied", 400   
+        tracker = db.session.query(Tracker).filter(Tracker.id == id and Tracker.user_id == current_user.id).first()
+        if not tracker:
+            return "Tracker not found", 404
+        options_list = []
+        options = db.session.query(Options).filter(Options.tracker_id == tracker.id).all()
+        for option in options:
+            options_list.append(option.name)
+        tracker_dict = {
+            'id' : tracker.id,
+            'name' : tracker.name,
+            'description' : tracker.description,
+            'type' : tracker.type,
+            'options' : options_list
+        }
+
+        return tracker_dict, 200
+    except: 
+        return "Unexpected error", 500
+
+@main.cache.memoize(timeout = 30)
+def getLogs(current_user):
+    try:
+        args = log_details_parser2.parse_args()
+        tracker_id = args.get('trackerid')  
+        tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
+        if not tracker:
+            return "Tracker not found.", 404
+        now = datetime.now()
+        dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+        tracker.last_modified = dt_string
+        db.session.commit()
+        logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
+        log_list = []
+        for log in logs:
+            log_list.append({'id': log.id, 'value' : log.value, 'note' : log.note, 'timestamp': log.timestamp})
+        return log_list, 200
+    except:
+        return "Unexpected error.", 500
+
+@main.cache.memoize(timeout = 30)
+def getLog(current_user, id):
+    try:
+        log = db.session.query(Log).filter(Log.id == id).first()
+        if not log:
+            return "Log not found", 404
+        tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
+        if not tracker:
+            return "You are not authorised", 401
+        return log, 200    
+    except:
+        return "Unexpected error", 500
+
+
 class UserAPI(Resource):
 
     def post(self):
@@ -79,50 +155,10 @@ class UserAPI(Resource):
             return "User created successfully.", 201
         except:
             return "Unexpected error.", 500
-
     @auth_required("token")
     @marshal_with(user_details)
     def get(self):
-        try:
-            return current_user, 200
-        except:
-            return "Unexpected error", 500
-    
-    @auth_required("token")
-    def patch(self):
-        try:
-            args = user_details_parser.parse_args()        
-            email = args.get("email")
-            password = args.get("password")
-            firstName = args.get("firstName")
-            lastName = args.get("lastName")
-
-            user = db.session.query(User).filter(User.email == email).first()
-            if user:
-                return "Email already exist.", 409
-            
-            logged_user = db.session.query(User).filter(User.email == current_user.email).first()
-
-            logged_user.email = email
-            logged_user.password = password
-            logged_user.first_name = firstName
-            logged_user.last_name = lastName
-            
-            db.session.commit()
-
-            return "Update Successful", 201
-        except:
-            return "Unexpected error", 500
-        
-    @auth_required("token")
-    def delete(self):
-        try:
-            logged_user = db.session.query(User).filter(User.email == current_user.email).first()
-            db.session.delete(logged_user)
-            db.session.commit()
-            return "Deletion Successful", 200
-        except:
-            return "Unexpected error", 500
+        return getUser(current_user)
 
 class Tracker1API(Resource):
     
@@ -162,6 +198,8 @@ class Tracker1API(Resource):
                 db.session.commit()
             else:
                 return "Unexpected error", 500
+            main.cache.delete_memoized(getTracker,current_user, id)
+            main.cache.delete_memoized(getTrackers,current_user)
             return "Tracker created Successfuly", 201
         except:
             new_tracker = db.session.query(Tracker).filter(Tracker.name == name).first()
@@ -172,40 +210,13 @@ class Tracker1API(Resource):
     
     @auth_required('token')
     def get(self):
-        try:
-            trackers = db.session.query(Tracker).filter(Tracker.user_id == current_user.id).all()
-            tracker_list = []
-            for tracker in trackers:
-                tracker_list.append({'id': tracker.id, 'name' : tracker.name, 'description' : tracker.description, 'last_modified' : tracker.last_modified})
-            return tracker_list, 200
-        except:
-            return "Unexpected error", 500  
+        return getTrackers(current_user)
 
 class Tracker2API(Resource):
     
     @auth_required('token')
-    def get(self, id):
-        try:
-            if not id:
-                return "Invalid id supplied", 400   
-            tracker = db.session.query(Tracker).filter(Tracker.id == id).first()
-            if not tracker:
-                return "Tracker not found", 404
-            options_list = []
-            options = db.session.query(Options).filter(Options.tracker_id == tracker.id).all()
-            for option in options:
-                options_list.append(option.name)
-            tracker_dict = {
-                'id' : tracker.id,
-                'name' : tracker.name,
-                'description' : tracker.description,
-                'type' : tracker.type,
-                'options' : options_list
-            }
-
-            return tracker_dict, 200
-        except: 
-            return "Unexpected error", 500  
+    def get(self, id):  
+        return getTracker(current_user, id)
 
     @auth_required("token")
     def patch(self, id):
@@ -239,7 +250,8 @@ class Tracker2API(Resource):
                         new_option = Options(tracker_id = id, name = options, active = 1)
                         db.session.add(new_option)
             db.session.commit()
-
+            main.cache.delete_memoized(getTracker,current_user, id)
+            main.cache.delete_memoized(getTrackers,current_user)
             return "Update Successful", 201
         except:
             return "Unexpected error", 500   
@@ -255,6 +267,8 @@ class Tracker2API(Resource):
                 return "Tracker not found.", 404
             db.session.delete(tracker)
             db.session.commit()
+            main.cache.delete_memoized(getTracker,current_user, id)
+            main.cache.delete_memoized(getTrackers,current_user)
             return "Deletion Successful", 200
         except:
             return "Unexpected error", 500      
@@ -276,46 +290,21 @@ class Log1API(Resource):
             new_log = Log(tracker_id = tracker_id, value = value, note = note, timestamp = timestamp)
             db.session.add(new_log)
             db.session.commit()
+            main.cache.delete_memoized(getLogs,current_user)
             return "Log created successfully.", 201
         except:
             return "Unexpected error.", 500
 
     @auth_required('token')
     def get(self):
-        try:
-            args = log_details_parser2.parse_args()
-            tracker_id = args.get('trackerid')  
-            tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
-            if not tracker:
-                return "Tracker not found.", 404
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            tracker.last_modified = dt_string
-            db.session.commit()
-            logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
-            log_list = []
-            for log in logs:
-                log_list.append({'id': log.id, 'value' : log.value, 'note' : log.note, 'timestamp': log.timestamp})
-            return log_list, 200
-        except:
-            return "Unexpected error.", 500
+        return getLogs(current_user)
 
 class Log2API(Resource):
 
     @auth_required('token')
     @marshal_with(log_details)
     def get(self, id):
-        try:
-            log = db.session.query(Log).filter(Log.id == id).first()
-            if not log:
-                return "Log not found", 404
-            tracker = db.session.query((Tracker.id == log.tracker_id) and (Tracker.user_id == current_user.id)).first()
-            if not tracker:
-                return "You are not authorised", 401
-            return log, 200
-            
-        except:
-            return "Unexpected error", 500
+        return getLog(current_user, id)
 
     @auth_required('token')
     def patch(self, id):
@@ -336,6 +325,8 @@ class Log2API(Resource):
             log.note = new_note
             log.timestamp = new_timestamp
             db.session.commit()
+            main.cache.delete_memoized(getLog,current_user, id)
+            main.cache.delete_memoized(getLogs,current_user)
             return "Update Successful", 201
         except:
             return "Unexpected error", 500
@@ -353,6 +344,8 @@ class Log2API(Resource):
                 return "You are not authorised", 401
             db.session.delete(log)
             db.session.commit()
+            main.cache.delete_memoized(getLog,current_user, id)
+            main.cache.delete_memoized(getLogs,current_user)
             return "Deletion Successful", 200
         except:
             return "Unexpected error", 500       

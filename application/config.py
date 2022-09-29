@@ -11,6 +11,10 @@ class Config():
     SECURITY_TOKEN_AUTHENTICATION_HEADER = "Authentication-Token"
     CELERY_BROKER_URL = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    REDIS_URL = "redis://localhost:6379"
+    CACHE_TYPE = "RedisCache"
+    CACHE_REDIS_HOST = "localhost"
+    CACHE_REDIS_PORT = 6379
 
 class LocalDevelopmentConfig(Config):
     SQLITE_DB_DIR = os.path.join(basedir, "../db_directory")
@@ -32,3 +36,7 @@ class LocalDevelopmentConfig(Config):
     SENDER_PASSWORD = ""
     ELERY_BROKER_URL = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    REDIS_URL = "redis://localhost:6379"
+    CACHE_TYPE = "RedisCache"
+    CACHE_REDIS_HOST = "localhost"
+    CACHE_REDIS_PORT = 6379
