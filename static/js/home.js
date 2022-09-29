@@ -78,6 +78,7 @@ let vue = new Vue({
     data(){
         return {
             name: 'User',
+            user_id: '',
             trackers: [],
         }
     },
@@ -160,6 +161,7 @@ let vue = new Vue({
             }
         })
         .then((user) => {
+            this.user_id = user.id
             this.name = user.first_name,
             this.name = this.name + " " + user.last_name
         })

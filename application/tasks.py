@@ -174,7 +174,7 @@ def report(sender, **kwargs):
     sender.add_periodic_task(crontab(day_of_month=1, hour=0, minute=0), generate_report_send_mail.s(), name = 'Send Monthly Report')
 
 @celery.task()
-def export_tracker(id):
+def export_logs(id):
     logs = db.session.query(Log).filter(Log.tracker_id == id).all()
     path = os.path.realpath(__file__).replace("application", "temp")
     path = path[:-8] + str(uuid.uuid4()) + ".csv"
@@ -184,6 +184,28 @@ def export_tracker(id):
     writer.writerow(header)
     for log in logs:
         writer.writerow([log.timestamp, log.value, log.note])
+    file.close()
+    return path
+
+@celery.task()
+def export_trackers(id):
+    trackers = db.session.query(Tracker).filter(Tracker.user_id == id).all()
+    path = os.path.realpath(__file__).replace("application", "temp")
+    path = path[:-8] + str(uuid.uuid4()) + ".csv"
+    file = open(path, "w")
+    writer = csv.writer(file)
+    header = ['name', 'description', 'type', 'options']
+    writer.writerow(header)
+
+    for tracker in trackers:
+        opt_str = ""
+        if tracker.type == 3 or tracker.type == 4:
+            options = db.session.query(Options).filter(Options.tracker_id == tracker.id and Options.active == 1).all()
+            for option in options:
+                opt_str = opt_str + option.name + "*"
+            opt_str = opt_str[:-1]
+        data = [tracker.name, tracker.description, tracker.type, opt_str]
+        writer.writerow(data)
     file.close()
     return path
 

@@ -22,6 +22,7 @@
                 </div>
                 <div class="col">
                     <div style="text-align: right;padding: 12px;">
+                        <a v-bind:href="'/trackers/export/'+ this.user_id" target="blank" class='btn btn-primary'>Export</a>
                         <a href="/tracker/create" class="btn btn-success" type="button">Add</a>
                         <button @click="userLogout" class="btn btn-danger" type="button">Logout</button></div>
                 </div>

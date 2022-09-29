@@ -36,13 +36,12 @@ def summary(id):
 def updateLog(id):
     return render_template("updateLog.html")
 
-@app.route("/tracker/export/<int:id>")
-def exportTracker(id):
+@app.route("/logs/export/<int:id>")
+def exportLogs(id):
     try:
-        job = tasks.export_tracker.delay(id)
+        job = tasks.export_logs.delay(id)
         file = job.wait()
-        return send_file(file, attachment_filename = "Tracker-"+(str(id) + ".csv"))
-        os.remove(file)
+        return send_file(file, attachment_filename = "Logs-"+(str(id) + ".csv"))
     except Exception as e:
         return str(e)
 
@@ -52,7 +51,15 @@ def exportLog(id):
         job = tasks.export_log.delay(id)
         file = job.wait()
         return send_file(file, attachment_filename = "Log-"+(str(id) + ".csv"))
-        os.remove(file)
+    except Exception as e:
+        return str(e)
+
+@app.route("/trackers/export/<int:id>")
+def exportTrackers(id):
+    try:
+        job = tasks.export_trackers.delay(id)
+        file = job.wait()
+        return send_file(file, attachment_filename = "Tracker-"+(str(id) + ".csv"))
     except Exception as e:
         return str(e)
 
