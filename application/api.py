@@ -141,9 +141,7 @@ class Tracker1API(Resource):
             if not 0 < int(type) < 5 : 
                 return "Invalid Tracker Type supplied", 400
             
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            new_tracker = Tracker(name = name, description = description, type = type, user_id = current_user.id, last_modified = dt_string)
+            new_tracker = Tracker(name = name, description = description, type = type, user_id = current_user.id, last_modified = "Never")
             db.session.add(new_tracker)
             db.session.commit()
 
@@ -151,9 +149,9 @@ class Tracker1API(Resource):
 
             if new_tracker:
                 if int(type) == 3:
-                    new_option = Options(tracker_id = new_tracker.id, name = "True", active = 1)
+                    new_option = Options(tracker_id = new_tracker.id, name = "true", active = 1)
                     db.session.add(new_option)
-                    new_option = Options(tracker_id = new_tracker.id, name = "False", active = 1)
+                    new_option = Options(tracker_id = new_tracker.id, name = "false", active = 1)
                     db.session.add(new_option)
                 elif int(type) == 4:
                     for option in options:
@@ -226,11 +224,8 @@ class Tracker2API(Resource):
             same_tracker = db.session.query(Tracker).filter((Tracker.name == new_name) and (Tracker.user_id == current_user.id)).first() 
             if same_tracker:
                 return "Tracker with the name already exist.", 400
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
             tracker.name = new_name
             tracker.description = new_description
-            tracker.last_modified = dt_string
 
             if tracker.type == 4:
                 options = db.session.query(Options).filter(Options.tracker_id == id)
@@ -280,9 +275,6 @@ class Log1API(Resource):
                 return "Tracker not found.", 404
             new_log = Log(tracker_id = tracker_id, value = value, note = note, timestamp = timestamp)
             db.session.add(new_log)
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            tracker.last_modified = dt_string
             db.session.commit()
             return "Log created successfully.", 201
         except:
@@ -296,6 +288,10 @@ class Log1API(Resource):
             tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
             if not tracker:
                 return "Tracker not found.", 404
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
+            tracker.last_modified = dt_string
+            db.session.commit()
             logs = db.session.query(Log).filter(Log.tracker_id == tracker_id).all()
             log_list = []
             for log in logs:
@@ -339,9 +335,6 @@ class Log2API(Resource):
             log.value = new_value
             log.note = new_note
             log.timestamp = new_timestamp
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            tracker.last_modified = dt_string        
             db.session.commit()
             return "Update Successful", 201
         except:
@@ -359,9 +352,6 @@ class Log2API(Resource):
             if not tracker:
                 return "You are not authorised", 401
             db.session.delete(log)
-            now = datetime.now()
-            dt_string = now.strftime("%Y-%m-%d At %H:%M:%S")
-            tracker.last_modified = dt_string
             db.session.commit()
             return "Deletion Successful", 200
         except:

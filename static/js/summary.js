@@ -479,7 +479,7 @@ let vue = new Vue({
         async uploadLog(){
             let formData = new FormData();           
             formData.append("file", fileupload.files[0]);
-            await fetch('/tracker/import/' + this.trackerData.id, {
+            await fetch('/logs/import/' + this.trackerData.id, {
                 method: "POST", 
                 body: formData
             }); 

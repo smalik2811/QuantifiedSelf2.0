@@ -268,6 +268,47 @@ def is_date(string, fuzzy=False):
         return False
 
 @celery.task()
+def import_tracker(path, user_id):
+    user = db.session.query(User).filter(User.id == user_id).first()
+    if user:
+        file = open(path, 'r')
+        reader = csv.reader(file)
+        fields = next(reader)
+        for row in reader:
+            if not len(row) == 4:
+                continue
+            if  1 <= int(row[2]) <= 4:
+                try:
+                    tracker = db.session.query(Tracker).filter(Tracker.name == row[0] and Tracker.user_id == user_id).first()
+                    if tracker:
+                        continue
+                    tracker = Tracker(name = row[0], description = row[1], type = int(row[2]), user_id = user_id, last_modified = "Never")
+                    db.session.add(tracker)
+                    db.session.commit()
+                except:
+                    continue
+                tracker = db.session.query(Tracker).filter(Tracker.name == row[0] and Tracker.user_id == user_id).first()
+                if tracker:
+                    if tracker.type == 3:
+                        option = Options(tracker_id = tracker.id, name = "true", active = 1)
+                        db.session.add(option)
+                        db.session.commit()
+                        option = Options(tracker_id = tracker.id, name = "false", active = 1)
+                        db.session.add(option)
+                        db.session.commit()
+                    if tracker.type == 4:
+                        opt_list = row[3].split("*")
+                        if len(opt) == 0:
+                            db.session.delete(tracker)
+                            db.session.commit()
+                            continue
+                        for opt in opt_list:
+                            option = Options(tracker_id = tracker.id, name = opt, active = 1)
+                            db.session.add(option)
+                            db.session.commit()
+        os.remove(path)
+
+@celery.task()
 def delete_files():
     path = os.path.realpath(__file__).replace("application", "temp")
     path = path[:-9]

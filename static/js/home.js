@@ -104,6 +104,16 @@ let vue = new Vue({
             } 
         },
 
+        async uploadTrackers(){
+            let formData = new FormData();           
+            formData.append("file", fileupload.files[0]);
+            await fetch('/trackers/import/' + this.user_id, {
+                method: "POST", 
+                body: formData
+            }); 
+            window.location.href = window.location.href
+        },
+
         async fetchTrackers(){
             await fetch('/api/tracker',{
                 method: 'get',

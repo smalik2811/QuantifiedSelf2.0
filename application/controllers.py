@@ -63,14 +63,24 @@ def exportTrackers(id):
     except Exception as e:
         return str(e)
 
-@app.route("/tracker/import/<int:id>", methods = ['POST'])
-def uploadTracker(id):
+@app.route("/logs/import/<int:id>", methods = ['POST'])
+def uploadLog(id):
     if request.method == 'POST':
         file = request.files['file']
         path = os.path.realpath(__file__).replace("application", "temp")
         path = path[:-8] + file.filename
         file.save(path)
         tasks.import_log.delay(path = path, tracker_id = id)
+    return home()
+
+@app.route("/trackers/import/<int:id>",methods= ['POST'])
+def uploadTracker(id):
+    if request.method == 'POST':
+        file = request.files['file']
+        path = os.path.realpath(__file__).replace("application", "temp")
+        path = path[:-8] + file.filename
+        file.save(path)
+        tasks.import_tracker.delay(path = path, user_id = id)
     return home()
 
 # Test
