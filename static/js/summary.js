@@ -483,6 +483,7 @@ let vue = new Vue({
                 method: "POST", 
                 body: formData
             }); 
+            window.location.href = window.location.href
         },
 
         async fetchTracker(){

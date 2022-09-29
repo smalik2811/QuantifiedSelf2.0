@@ -161,7 +161,8 @@ let app = new Vue({
         },
 
         async createLog(){
-
+            let timestamp = this.logData.timestamp
+            this.logData.timestamp = timestamp.substring(0,10) + " " + timestamp.substring(11,16)
             fetch('/api/log', {
                 method: 'post',
                 headers: {

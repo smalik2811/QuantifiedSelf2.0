@@ -1,5 +1,3 @@
-from fileinput import filename
-from sqlite3 import Timestamp
 from application.workers import celery
 from datetime import datetime, date
 from celery.schedules import crontab
@@ -11,7 +9,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email import encoders
-from application.models import User,Tracker,Log, MonthHistroy
+from application.models import User,Tracker,Log, MonthHistroy, Options
 from application.database import db
 from application.config import LocalDevelopmentConfig
 from jinja2 import Template
@@ -19,6 +17,8 @@ from weasyprint import HTML, CSS
 import uuid
 from dateutil.relativedelta import relativedelta
 from email.mime.base import MIMEBase
+from dateutil.parser import parse
+import re
 
 
 @celery.task()
@@ -171,7 +171,7 @@ def generate_report_send_mail():
 
 @celery.on_after_finalize.connect
 def report(sender, **kwargs):
-    sender.add_periodic_task(crontab(day_of_month=1, hour=0), generate_report_send_mail.s(), name = 'Send Monthly Report')
+    sender.add_periodic_task(crontab(day_of_month=1, hour=0, minute=0), generate_report_send_mail.s(), name = 'Send Monthly Report')
 
 @celery.task()
 def export_tracker(id):
@@ -202,11 +202,58 @@ def export_log(id):
 
 @celery.task()
 def import_log(path, tracker_id):
-    file = open(path, 'r')
-    reader = csv.reader(file)
-    fields = next(reader)
-    for row in reader:
-        log = Log(tracker_id = tracker_id, value = row[1], note = row[2], timestamp = row[0])
-        db.session.add(log)
-        db.session.commit()
-    os.remove(path)
+    tracker = db.session.query(Tracker).filter(Tracker.id == tracker_id).first()
+    if tracker:
+        file = open(path, 'r')
+        reader = csv.reader(file)
+        fields = next(reader)
+        for row in reader:
+            if not len(row) == 3:
+                continue
+            if not is_date(row[0]):
+                continue
+            if (tracker.type == 1 or tracker.type == 2) and str.isdigit(row[1]):
+                addLog(tracker_id,row)
+            if (tracker.type == 3 and (row[1]=="true" or row[1] == "false")):
+                addLog(tracker_id,row)
+            if tracker.type == 4:
+                options = db.session.query(Options).filter(Options.tracker_id == tracker_id and Options.active == 1)
+                active_options = []
+                for option in options:
+                    active_options.append(option.name)
+                if row[1] in active_options:
+                    addLog(tracker_id, row)
+        os.remove(path)
+
+def addLog(tracker_id, row):
+    log = Log(tracker_id = tracker_id, value = row[1], note = row[2], timestamp = row[0])
+    db.session.add(log)
+    db.session.commit()
+
+def is_date(string, fuzzy=False):
+    try: 
+        parse(string, fuzzy=fuzzy)
+        dateRegex = re.compile(r'\d\d\d\d-\d\d-\d\d \d\d:\d\d')
+        date_str = dateRegex.search(string)
+        if date_str is None:
+            return False
+        date_str = str(date_str.group())
+        if len(string) == len(date_str):
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+@celery.task()
+def delete_files():
+    path = os.path.realpath(__file__).replace("application", "temp")
+    path = path[:-9]
+    files = os.listdir(path)
+    for file in files:
+        if os.path.exists(path):
+            os.remove(path + "/" + file)
+
+@celery.on_after_finalize.connect
+def scheduled_delete_files(sender, **kwargs):
+    sender.add_periodic_task(crontab(hour=0, minute=0), generate_report_send_mail.s(), name = 'Delete Unwanted files')

@@ -80,5 +80,5 @@ def mail():
 
 @app.route("/report")
 def report():
-    tasks.generate_report_send_mail()
+    tasks.delete_files()
     return "OK",200

@@ -103,7 +103,7 @@
                                         <form id="upload-file" method="post" enctype="multipart/form-data"></form>
                                             <label for="formFile" class="form-label">Upload a CSV file containing logs</label>
                                             <div class="input-group mb-3">
-                                                <input class="form-control" type="file" accept=".csv" id="fileupload" name="fileupload" aria-describedby="button-addon2">
+                                                <input class="form-control" type="file" accept=".csv" id="fileupload" name="fileupload" aria-describedby="button-addon2" required="true">
                                                 <button id="button-addon2" @click="uploadLog()" type="button" class="btn btn-primary">Upload</button>
                                             </div>
                                         </form>
