@@ -1,5 +1,0 @@
-name,description,type,options
-Page read,"The number of pages I read today of the book ""All vs All"".",1,
-Water drank,I drank 5 glasses of water today.,3,False*True
-Coding Practised,The amount of time I coded today.,2,
-Game Played,The game I played in the Evening.,4,Chess*Cricket*Football

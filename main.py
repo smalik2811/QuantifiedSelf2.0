@@ -139,10 +139,8 @@ def getTracker(current_user,id):
         return "Unexpected error", 500
 
 @cache.memoize(timeout = 100)
-def getLogs(current_user):
-    try:
-        args = log_details_parser2.parse_args()
-        tracker_id = args.get('trackerid')  
+def getLogs(current_user, tracker_id):
+    try: 
         tracker = db.session.query(Tracker).filter((Tracker.id == tracker_id) and (Tracker.user_id == current_user.id)).first()
         if not tracker:
             return "Tracker not found.", 404
@@ -340,7 +338,9 @@ class Log1API(Resource):
 
     @auth_required('token')
     def get(self):
-        return getLogs(current_user)
+        args = log_details_parser2.parse_args()
+        tracker_id = args.get('trackerid') 
+        return getLogs(current_user, tracker_id)
 
 class Log2API(Resource):
 
