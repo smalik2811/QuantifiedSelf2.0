@@ -303,7 +303,7 @@ class Tracker2API(Resource):
         try:
             if not id:
                 return "Invalid id supplied", 400
-            tracker = db.session.query(Tracker).filter(Tracker.id == id).first()
+            tracker = db.session.query(Tracker).filter(Tracker.id == id and Tracker.user_id == current_user.id).first()
             if not tracker:
                 return "Tracker not found.", 404
             db.session.delete(tracker)
