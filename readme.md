@@ -3,7 +3,10 @@
 - Run `setup.sh`
 
 # Local Development Run
+- `sudo start redis-server start` This command will start redis server
 - `local_run.sh` It will start the flask app in `development`. Suited for local development
+-  `local_beat.sh` It will start the celery beat
+-  `local_workers.sh` It will start celery workers
 
 # Folder Structure
 
