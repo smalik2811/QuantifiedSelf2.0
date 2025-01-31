@@ -56,3 +56,7 @@ class TrackerType(db.Model):
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
+
+class MonthHistroy(db.Model):
+    __tablename__ = 'month_history'
+    tracker_id = db.Column(db.Integer, db.ForeignKey("tracker.id") , primary_key=True, nullable = False)

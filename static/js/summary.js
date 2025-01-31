@@ -18,6 +18,7 @@ Vue.component('log', {
                             <button class="btn btn-warning dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button">Action</button>
                             <div class="dropdown-menu">
                             <button @click="updateLog(id)"class="dropdown-item link-info" type="button"><strong>Update</strong></button>
+                            <a v-bind:href="'/log/export/'+ this.id" target="blank" class='dropdown-item link-primary'><strong>Export</strong></a>
                             <button @click="removeLog(id)" class="dropdown-item link-danger" type="button"><strong>Remove</strong></button>
                             </div>
                         </div>
@@ -473,6 +474,16 @@ let vue = new Vue({
             }else{
                 window.alert(response.statusText)
             } 
+        },
+
+        async uploadLog(){
+            let formData = new FormData();           
+            formData.append("file", fileupload.files[0]);
+            await fetch('/logs/import/' + this.trackerData.id, {
+                method: "POST", 
+                body: formData
+            }); 
+            window.location.href = window.location.href
         },
 
         async fetchTracker(){

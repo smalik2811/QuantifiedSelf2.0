@@ -170,7 +170,7 @@ let app = new Vue({
         async updateLog(){
             const log = {
                 'value': this.logData.value,
-                'timestamp': this.logData.timestamp,
+                'timestamp': this.logData.timestamp.substring(0,10) + " " + this.logData.timestamp.substring(11,16),
                 'note': this.logData.note
             }
             fetch('/api/log/' + this.logData.id, {
@@ -230,6 +230,8 @@ let app = new Vue({
         if(response.status == 200){
             let data = await response.json()
             this.logData = data
+            let timestamp = this.logData.timestamp
+            this.logData.timestamp = timestamp.substring(0,10) + "T" + timestamp.substring(11,16)
         }else if(response.status == 400){
             window.alert(response.statusText)
         }else if(response.status == 401){}

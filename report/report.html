@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="report.css" rel="stylesheet">
+    <title>Report</title>
+    <meta name="description" content="Monthly Report">
+  </head>
+
+  <body>
+    <article class="cover">
+      <h1>Monthly Report</h1>
+      <address>
+        Sonu,
+        21f1001878@student.onlinedegree.iitm.ac.in
+      </address>
+    </article>
+
+    <article class="contents">
+      <h2>Table of contents</h2>
+      <h3>Part one</h3>
+      <ul>
+        <li><a href="#overview"></a></li>
+      </ul>
+
+      <h3>Part two</h3>
+      <ul>
+        <li><a href="#Trackers"></a></li>
+        {% for tracker in trackers %}
+          <li><a href="#{{tracker['name']}}"></a></li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="skills">
+      <h2 id="overview" class="skills-title">Brief Overview</h2>
+
+      <h3>Hi <strong>{{user['first_name']}} {{user['last_name']}}</strong>, this is a brief overview of your activity for the past
+         <br> month of <em>{{misc['month']}}</em></h3>
+
+      <section class="table-content">
+        <h4>Tracker Created</h4>
+        <p>
+          In the past month of <em>{{misc['month']}}</em>, you created <strong>{{misc['newcount']}}</strong> new tracker.
+        </p>
+      </section>
+
+      <section class="heading">
+        <h4>Numerical Trackers</h4>
+        <p>
+          You have created <strong>{{misc['numcount']}}</strong> new <em>Numerical Trackers</em>.
+          These are: {{misc['numtrackers']}}
+        </p>
+      </section>
+
+      <section class="multi-columns">
+        <h4>Boolean Trackers</h4>
+        <p>
+          You have created <strong>{{misc['boolcount']}}</strong> new <em>Boolean Trackers</em>.
+          These are: {{misc['booltrackers']}}
+        </p>
+      </section>
+
+      <section class="internal-links">
+        <h4>Time-Duration Trackers</h4>
+        <p>
+          You have created <strong>{{misc['durcount']}}</strong> new <em>Time-Duration Trackers</em>.
+          These are: {{misc['durtrackers']}}
+        </p>
+      </section>
+
+      <section class="style">
+        <h4>Multi-Choice Trackers</h4>
+        <p>
+          You have created <strong>{{misc['multicount']}}</strong> new <em>Multi-Choice Trackers</em>.
+          These are: {{misc['multitrackers']}}
+        </p>
+      </section>
+    </article>
+
+    <article class="chapter">
+      <h2 id="Trackers" class="chapter-title">Trackers logged in <em>{{misc['month']}}</em></h2>
+    </article>
+
+    {% for tracker in trackers %}
+
+      <article class="offers">
+        <h2 id="{{tracker['name']}}" class="offers-title">{{tracker['name']}}</h2>
+
+        <h3>{{tracker['description']}}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Note</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs%}
+              {% if log['tracker_id'] == tracker['id'] %}
+                <tr>
+                  <td>{{log['timestamp']}}</td>
+                  <td>{{log['note']}}</td>
+                  <td>{{log['value']}}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </article>
+    {% endfor %}
+  </body>
+</html>

@@ -8,6 +8,12 @@ class Config():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
     SECURITY_TOKEN_AUTHENTICATION_HEADER = "Authentication-Token"
+    CELERY_BROKER_URL = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    REDIS_URL = "redis://localhost:6379"
+    CACHE_TYPE = "RedisCache"
+    CACHE_REDIS_HOST = "localhost"
+    CACHE_REDIS_PORT = 6379
 
 class LocalDevelopmentConfig(Config):
     SQLITE_DB_DIR = os.path.join(basedir, "../db_directory")
@@ -22,3 +28,14 @@ class LocalDevelopmentConfig(Config):
     SECURITY_LOGIN_URL = "/api/user/login"
     SECURITY_LOGOUT_URL = "/api/user/logout"
     SECURITY_BACKWARDS_COMPAT_UNAUTHN = True
+    CHAT_WEBHOOK_URL = "https://chat.googleapis.com/v1/spaces/AAAAwvcHlMM/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=vn85jvSd-pdPlUMgYhmgb3aemG8BPbmoEDFXby2rVoE%3D"
+    SMTP_SERVER_HOST = "localhost"
+    SMTP_SERVER_PORT = 1025
+    SENDER_ADDRESS = "quantified.notifier@quant.com"
+    SENDER_PASSWORD = ""
+    ELERY_BROKER_URL = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    REDIS_URL = "redis://localhost:6379"
+    CACHE_TYPE = "RedisCache"
+    CACHE_REDIS_HOST = "localhost"
+    CACHE_REDIS_PORT = 6379
