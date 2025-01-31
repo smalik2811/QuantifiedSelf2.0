@@ -114,7 +114,7 @@ QuantifiedSelf App V2 is a self-tracking application that allows users to monito
 
 ## 📹 Demo
 
-<Placeholder>
+https://github.com/user-attachments/assets/330c35eb-f48f-4de1-bbb3-4bd1e8ab8508
 
 ## 📂 Project Structure
 
