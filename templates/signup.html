@@ -20,7 +20,8 @@
                 </div>
             </div>
             <div class="col">
-                <div style="text-align: right;padding: 12px;"><button class="btn btn-danger" type="button" style="border-radius: 4px;">Sign in</button></div>
+                <div style="text-align: right;padding: 12px;"><button class="btn btn-danger" type="button"
+                        style="border-radius: 4px;">Sign in</button></div>
             </div>
         </div>
         <div class="row" style="margin-top: 2vh;">
@@ -32,12 +33,21 @@
                         </div>
                         <div>
                             <form action="">
-                                <div style="margin: 10px;"><label class="form-label">Firstname</label><input v-model="userData.firstName" required class="form-control" type="text" minlength="4"></div>
-                                <div style="margin: 10px;"><label class="form-label">Lirstname</label><input v-model="userData.lastName" class="form-control" type="text"></div>
-                                <div style="margin: 11px;"><label class="form-label">Email</label><input required v-model="userData.email" class="form-control" type="email" required></div>
-                                <div style="margin: 11px;"><label class="form-label">Password</label><input required v-model="userData.password"  class="form-control" type="password" minlength="8"></div>
-                                <div style="margin: 11px;"><label class="form-label">Confirm Password</label><input required v-model="confirm_password" class="form-control" type="password"></div>
-                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;"><button @click.prevent="signup" class="btn btn-success" type="Submit">Sign up</button></div>
+                                <div style="margin: 10px;"><label class="form-label">Firstname</label><input
+                                        v-model="userData.firstName" required class="form-control" type="text"
+                                        minlength="4"></div>
+                                <div style="margin: 10px;"><label class="form-label">Lastname</label><input
+                                        v-model="userData.lastName" class="form-control" type="text"></div>
+                                <div style="margin: 11px;"><label class="form-label">Email</label><input required
+                                        v-model="userData.email" class="form-control" type="email" required></div>
+                                <div style="margin: 11px;"><label class="form-label">Password</label><input required
+                                        v-model="userData.password" class="form-control" type="password" minlength="8">
+                                </div>
+                                <div style="margin: 11px;"><label class="form-label">Confirm Password</label><input
+                                        required v-model="confirm_password" class="form-control" type="password"></div>
+                                <div class="text-center" style="text-align: right;padding: 22px;margin-bottom: 0px;">
+                                    <button @click.prevent="signup" class="btn btn-success" type="Submit">Sign
+                                        up</button></div>
                             </form>
                         </div>
                     </div>
@@ -50,4 +60,5 @@
     <script src="../static/vue/vue.js"></script>
     <script src="../static/js/signup.js"></script>
 </body>
+
 </html>
